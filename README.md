@@ -1,68 +1,150 @@
-# :package_description
+# NovaFieldIndicator
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-<!--delete-->
----
-This repo can be used to scaffold a Laravel package. Follow these steps to get started:
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/gabrielesbaiz/nova-field-indicator.svg?style=flat-square)](https://packagist.org/packages/gabrielesbaiz/nova-field-indicator)
+[![Total Downloads](https://img.shields.io/packagist/dt/gabrielesbaiz/nova-field-indicator.svg?style=flat-square)](https://packagist.org/packages/gabrielesbaiz/nova-field-indicator)
 
-1. Press the "Use this template" button at the top of this repo to create a new repo with the contents of this skeleton.
-2. Run "php ./configure.php" to run a script that will replace all placeholders throughout all the files.
-3. Have fun creating your package.
-4. If you need help creating a package, consider picking up our <a href="https://laravelpackage.training">Laravel Package Training</a> video course.
----
-<!--/delete-->
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+A colour-coded indicator field for Laravel Nova.
 
-## Support us
+Original code from [oleghalin/nova4-indicator-field](https://github.com/oleghalin/nova4-indicator-field)
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/:package_name.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/:package_name)
+## Features
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+- ✅ With labels
+- ✅ Without labels
+- ✅ Hide defined values
+- ✅ Named colours
+- ✅ Literal colours
 
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require :vendor_slug/:package_slug
-```
-
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag=":package_slug-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag=":package_slug-config"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag=":package_slug-views"
+composer require gabrielesbaiz/nova-field-indicator
 ```
 
 ## Usage
 
 ```php
-$variable = new VendorName\Skeleton();
-echo $variable->echoPhrase('Hello, VendorName!');
+use Gabrielesbaiz\NovaFieldIndicator\NovaFieldIndicator;
+
+NovaFieldIndicator::make('Status'),
+```
+
+### Options
+#### Labels
+
+```php
+NovaFieldIndicator::make('Status')
+    ->labels([
+        'banned' => 'Banned',
+        'active' => 'Active',
+        'invited' => 'Invited',
+        'inactive' => 'Inactive',
+    ])
+```
+
+#### Without Labels
+
+```php
+NovaFieldIndicator::make('Status')
+    ->withoutLabels()
+```
+
+#### Unknown Label
+
+```php
+NovaFieldIndicator::make('Status')
+    ->unknown('Unknown')
+```
+#### Should Hide
+
+```php
+NovaFieldIndicator::make('Status')
+    ->shouldHide('active')
+```
+
+```php
+NovaFieldIndicator::make('Status')
+    ->shouldHide(['invited', 'requested'])
+```
+
+```php
+NovaFieldIndicator::make('Status')
+    ->shouldHide(function($value) {
+        return $value == 'inactive';
+    })
+```
+
+#### Should Hide If No
+
+```php
+NovaFieldIndicator::make('Status')
+    ->shouldHideIfNo()
+```
+
+#### Colours
+##### Named Colours
+
+```php
+NovaFieldIndicator::make('Status')
+    ->colors([
+        'banned' => 'red',
+        'active' => 'green',
+        'invited' => 'blue',
+        'inactive' => 'grey',
+    ])
+```
+
+The available colours are the default "base" colours from [Tailwind](https://tailwindcss.com/docs/colors), with the addition of black:
+* 'black'   `#22292F`
+* 'grey' or 'gray' `#B8C2CC`
+* 'red'     `#E3342F`
+* 'orange'  `#F6993F`
+* 'yellow'  `#FFED4A`
+* 'green'   `#38C172`
+* 'teal'    `#4DC0B5`
+* 'blue'    `#3490DC`
+* 'indigo'  `#6574CD`
+* 'purple'  `#9561E2`
+* 'pink'    `#F66D9B`
+
+As well as the following Nova variable colours:
+
+* 'success' `var(--success)`
+* 'warning' `var(--warning)`
+* 'danger'  `var(--danger)`
+* 'info'    `var(--info)`
+
+Colour classes are not validated against the lists above, so if you enter an invalid colour, it will fall back to grey.
+
+##### Literal Colours
+
+```php
+NovaFieldIndicator::make('Status')
+    ->colors([
+        '...' => '#ff0000',
+        '...' => 'rgb(0, 255, 0)',
+        '...' => 'rgba(0, 0, 0, 0.5)',
+        '...' => 'hsl(120, 100%, 50%)',
+        '...' => 'hsla(120, 100%, 50%, 0.5)',
+        '...' => 'var(--success)',
+    ])
+```
+
+##### Additional Colour Classes
+
+```css
+.indicator-yourcolourname {
+    background: #000000;
+}
+```
+
+```php
+NovaFieldIndicator::make('Status')
+    ->colors([
+        'yourstatus' => 'yourcolourname',
+    ])
 ```
 
 ## Testing
@@ -85,7 +167,8 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [:author_name](https://github.com/:author_username)
+- [Oleg Khalin](https://github.com/oleghalin)
+- [Gabriele Sbaiz](https://github.com/gabrielesbaiz)
 - [All Contributors](../../contributors)
 
 ## License
