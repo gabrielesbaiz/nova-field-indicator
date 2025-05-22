@@ -12,9 +12,9 @@
     },
     "devDependencies": {
         "@vue/compiler-sfc": "^3.2.33",
-    "form-backend-validation": "^2.3.3",
         "cross-env": "^5.0.0",
         "laravel-mix": "^6.0",
+        "laravel-nova-devtool": "file:vendor/laravel/nova-devtool",
         "lodash": "^4.17.21",
         "postcss": "^8.3.11",
         "resolve-url-loader": "^5.0.0",
