@@ -1,0 +1,15 @@
+# larastan is wired in automatically by phpstan/extension-installer, so it must
+# not be included here as well.
+parameters:
+    level: 6
+
+    paths:
+        - src
+        - config
+
+    # Keeps the analysis cache out of the package root.
+    tmpDir: build/phpstan
+
+    # PHPDoc in this package is documentation, not a proof. Trusting it as
+    # certain makes larastan report perfectly reachable branches as dead.
+    treatPhpDocTypesAsCertain: false

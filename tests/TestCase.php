@@ -1,37 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gabrielesbaiz\NovaFieldIndicator\Tests;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Orchestra\Testbench\TestCase as Orchestra;
 use Gabrielesbaiz\NovaFieldIndicator\NovaFieldIndicatorServiceProvider;
+use Gabrielesbaiz\NovaFieldIndicator\Support\EnumStates;
+use Inertia\ServiceProvider as InertiaServiceProvider;
+use Laravel\Nova\NovaCoreServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
-class TestCase extends Orchestra
+abstract class TestCase extends Orchestra
 {
     protected function setUp(): void
     {
         parent::setUp();
 
-        Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Gabrielesbaiz\\NovaFieldIndicator\\Database\\Factories\\'.class_basename($modelName).'Factory'
-        );
+        // The enum state table is memoized per class for the life of the
+        // process, which is what keeps a 50-row index to one cases() pass.
+        // Tests need it cleared so one test's fixture cannot leak into another.
+        EnumStates::flush();
     }
 
-    protected function getPackageProviders($app)
+    /**
+     * @return list<class-string>
+     */
+    protected function getPackageProviders($app): array
     {
         return [
+            // Nova's core provider resolves Inertia at boot, so Inertia has to
+            // be registered before it rather than discovered afterwards.
+            InertiaServiceProvider::class,
+            NovaCoreServiceProvider::class,
             NovaFieldIndicatorServiceProvider::class,
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    protected function defineEnvironment($app): void
     {
-        config()->set('database.default', 'testing');
-
-        /*
-         foreach (\Illuminate\Support\Facades\File::allFiles(__DIR__ . '/database/migrations') as $migration) {
-            (include $migration->getRealPath())->up();
-         }
-         */
+        $app['config']->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
+        $app['config']->set('database.default', 'testing');
+        $app['config']->set('database.connections.testing', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+        ]);
+        $app['config']->set('cache.default', 'array');
     }
 }

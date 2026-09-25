@@ -1,9 +1,15 @@
 {
     "name": "gabrielesbaiz/nova-field-indicator",
-    "description": "A colour-coded indicator field for Laravel Nova",
+    "description": "A colour-coded status indicator field for Laravel Nova, with enum-first configuration, shapes, icons, dark mode and index filtering.",
     "keywords": [
         "Gabriele Sbaiz",
         "laravel",
+        "laravel-nova",
+        "nova",
+        "nova-field",
+        "indicator",
+        "status",
+        "badge",
         "nova-field-indicator"
     ],
     "homepage": "https://github.com/gabrielesbaiz/nova-field-indicator",
@@ -16,19 +22,20 @@
         }
     ],
     "require": {
-        "php": "^8.0",
-        "spatie/laravel-package-tools": "^1.16",
-        "illuminate/support": "^10.0|^11.0|^12.0"
+        "php": "^8.3",
+        "illuminate/contracts": "^12.0|^13.0",
+        "illuminate/support": "^12.0|^13.0",
+        "laravel/nova": "^5.7"
     },
     "require-dev": {
-        "laravel/nova": "^5.0",
-        "laravel/nova-devtool": "^1.7",
+        "larastan/larastan": "^3.1",
         "laravel/pint": "^1.14",
-        "nunomaduro/collision": "^8.1.1||^7.10.0",
-        "orchestra/testbench": "^10.0.0||^9.0.0||^8.22.0",
-        "pestphp/pest": "^3.0",
-        "pestphp/pest-plugin-arch": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.0"
+        "nunomaduro/collision": "^8.1.1",
+        "orchestra/testbench": "^10.0|^11.0",
+        "pestphp/pest": "^3.0|^4.0",
+        "pestphp/pest-plugin-arch": "^3.0|^4.0",
+        "pestphp/pest-plugin-laravel": "^3.0|^4.0",
+        "phpstan/extension-installer": "^1.4"
     },
     "autoload": {
         "psr-4": {
@@ -37,17 +44,24 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Gabrielesbaiz\\NovaFieldIndicator\\Tests\\": "tests/",
-            "Workbench\\App\\": "workbench/app/"
+            "Gabrielesbaiz\\NovaFieldIndicator\\Tests\\": "tests/"
         }
     },
     "scripts": {
         "post-autoload-dump": "@composer run prepare",
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
         "analyse": "vendor/bin/phpstan analyse",
+        "format": "vendor/bin/pint",
+        "lint": [
+            "@format",
+            "@analyse"
+        ],
         "test": "vendor/bin/pest",
         "test-coverage": "vendor/bin/pest --coverage",
-        "format": "vendor/bin/pint"
+        "check": [
+            "@lint",
+            "@test"
+        ]
     },
     "config": {
         "sort-packages": true,
@@ -70,5 +84,8 @@
             "type": "composer",
             "url": "https://nova.laravel.com"
         }
+    },
+    "conflict": {
+        "laravel/nova": "<5.7.0|>=6.0.0"
     }
 }

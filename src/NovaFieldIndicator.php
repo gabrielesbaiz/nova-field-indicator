@@ -1,129 +1,154 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gabrielesbaiz\NovaFieldIndicator;
 
-use Closure;
+use Gabrielesbaiz\NovaFieldIndicator\Results\Indicator;
+use Gabrielesbaiz\NovaFieldIndicator\Support\State;
+use Gabrielesbaiz\NovaFieldIndicator\Support\ValueNormalizer;
+use Laravel\Nova\Contracts\FilterableField;
 use Laravel\Nova\Fields\Field;
+use Laravel\Nova\Fields\FieldFilterable;
+use Laravel\Nova\Fields\Unfillable;
+use Override;
 
-class NovaFieldIndicator extends Field
+/**
+ * A colour-coded status indicator for Nova index and detail views.
+ *
+ * Deliberately not final: subclassing is the documented extension point, and
+ * resolveIndicatorFor() is the seam to override.
+ *
+ * Every lookup happens here on the server, once per value, and only the result
+ * is serialized — see jsonSerialize(). 2.x pushed the whole label and colour
+ * configuration to the browser with every row, then looked it up again per
+ * cell.
+ *
+ * @phpstan-consistent-constructor
+ */
+class NovaFieldIndicator extends Field implements FilterableField, Unfillable
 {
-    /**
-     * Indicates if the element should be shown on the creation view.
-     *
-     * @var bool
-     */
-    public $showOnCreation = false;
+    use Concerns\DerivesFromEnums;
+    use Concerns\FiltersByState;
+    use Concerns\HasAppearance;
+    use Concerns\HasStates;
+    use Concerns\HidesValues;
+    use Concerns\ResolvesColors;
+    use Concerns\ResolvesIcons;
+    use Concerns\ResolvesLabels;
+    use FieldFilterable {
+        // Both traits define serializeForFilter(). Nova's returns the whole
+        // field; ours trims it to the option list a SelectFilter needs, so it
+        // is the one that must win.
+        Concerns\FiltersByState::serializeForFilter insteadof FieldFilterable;
+    }
 
     /**
-     * Indicates if the element should be shown on the update view.
+     * The field's Vue component.
      *
-     * @var bool
-     */
-    public $showOnUpdate = false;
-
-    /**
-     * The field's component.
+     * Renamed from 2.x's very generic `indicator-field`, which risked
+     * colliding with any other package that registered the same name.
      *
      * @var string
      */
-    public $component = 'indicator-field';
+    public $component = 'nova-field-indicator';
 
     /**
-     * The callback to be used to hide the field.
-     *
-     * @var Closure
+     * @var string
      */
-    public $hideCallback;
+    public $textAlign = 'left';
 
     /**
-     * Specify the labels that should be displayed.
+     * Prepare the element for JSON serialization.
      *
-     * @param  array $labels
-     * @return $this
+     * @return array<string, mixed>
      */
-    public function labels(array $labels)
+    #[Override]
+    public function jsonSerialize(): array
     {
-        return $this->withMeta(['labels' => $labels, 'withoutLabels' => false]);
+        $this->detectEnumFrom($this->value);
+
+        $hidden = $this->shouldHideValue($this->value, $this->resource);
+
+        return array_merge(parent::jsonSerialize(), [
+            // Always a list. A scalar yields one entry, an array yields many,
+            // so a JSON-cast tag column renders several marks with no extra
+            // branching on the client.
+            'indicators' => $hidden ? [] : $this->resolveIndicators(),
+            'shape' => $this->resolvedShape()->value,
+            'size' => $this->resolvedSize()->value,
+            'shouldHide' => $hidden,
+            'emptyText' => (string) config('nova-field-indicator.labels.empty', '—'),
+        ]);
     }
 
     /**
-     * Specify the colours that should be displayed.
+     * Apply the display-only defaults.
      *
-     * @param  array $colors
-     * @return $this
+     * configureDefaults() rather than the constructor because that is the hook
+     * Nova's own Badge uses, and it runs after the field's attribute is known.
+     * exceptOnForms() replaces 2.x's $showOnCreation/$showOnUpdate properties
+     * and additionally covers the attach and update-attached views, which those
+     * two properties missed.
      */
-    public function colors(array $colors)
+    #[Override]
+    protected function configureDefaults(): void
     {
-        return $this->withMeta(['colors' => $colors]);
+        parent::configureDefaults();
+
+        $this->exceptOnForms();
+
+        // Nova declares $inline itself and serializes it, so the package
+        // default is applied to its property rather than shadowing it.
+        $this->inline = (bool) config('nova-field-indicator.appearance.inline', true);
     }
 
     /**
-     * The label to display when the value is not one of the defined statuses.
+     * Resolve one value into a fully described indicator.
      *
-     * @param  string $label
-     * @return $this
+     * Override this in a subclass to change resolution; it is the only seam the
+     * rest of the field depends on.
      */
-    public function unknown(string $label)
+    protected function resolveIndicatorFor(string|int|null $key, mixed $resource): Indicator
     {
-        return $this->withMeta(['unknownLabel' => $label]);
+        $state = $this->stateFor($key) ?? $this->rangeStateFor();
+        $color = $this->resolveColorFor($key, $state, $resource);
+
+        return new Indicator(
+            value: $key,
+            label: $this->resolveLabelFor($key, $state, $resource),
+            ariaLabel: $this->resolveAriaLabel($key, $state, $resource),
+            color: $color,
+            icon: $this->resolveIconFor($state, $color, $resource),
+            tooltip: $this->resolveTooltipFor($state, $resource),
+            pulse: $this->resolvePulseFor($key, $state, $resource),
+        );
     }
 
     /**
-     * Display the raw value instead of a label.
-     *
-     * @return $this
+     * @return list<array<string, mixed>>
      */
-    public function withoutLabels()
+    protected function resolveIndicators(): array
     {
-        return $this->withMeta(['withoutLabels' => true]);
-    }
+        $keys = ValueNormalizer::list($this->value);
 
-    /**
-     * Define the callback or value(s) that should be used to hide the field.
-     *
-     * @param  callable|array|mixed $hideCallback
-     * @return $this
-     */
-    public function shouldHide($hideCallback)
-    {
-        $this->hideCallback = $hideCallback;
-
-        return $this;
-    }
-
-    /**
-     * Define that the field should be hidden if falsy (0, false, null, '').
-     *
-     * @return $this
-     */
-    public function shouldHideIfNo()
-    {
-        $this->hideCallback = function ($value) {
-            return ! $value;
-        };
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveForDisplay($resource, ?string $attribute = null): void
-    {
-        parent::resolveForDisplay($resource, $attribute);
-
-        if (is_null($this->hideCallback)) {
-            return;
+        if ($keys === []) {
+            // No value at all still resolves one indicator, so an ->unknown()
+            // label and its colour are shown rather than an empty cell.
+            $keys = [null];
         }
 
-        if (is_callable($this->hideCallback)) {
-            $shouldHide = call_user_func($this->hideCallback, $this->value, $resource);
-        } elseif (is_array($this->hideCallback)) {
-            $shouldHide = in_array($this->value, $this->hideCallback, false);
-        } else {
-            $shouldHide = $this->value == $this->hideCallback;
-        }
+        return array_values(array_map(
+            fn (string|int|null $key): array => $this->resolveIndicatorFor($key, $this->resource)->toArray(),
+            $keys,
+        ));
+    }
 
-        $this->withMeta(['shouldHide' => (bool) $shouldHide]);
+    /**
+     * The range band matching the current value, if ->ranges() is in use.
+     */
+    protected function rangeStateFor(): ?State
+    {
+        return $this->ranges?->match($this->value);
     }
 }
