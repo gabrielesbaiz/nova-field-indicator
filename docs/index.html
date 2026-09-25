@@ -1516,8 +1516,8 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
         <b>2.x <code>withoutLabels()</code></b> meant &ldquo;print the raw value
         instead of a mapped label&rdquo;. In 3.0 that is simply the default: an
         unmapped value falls back to itself. In almost every case you just delete
-        the call, and the command does that for you when the chain has no
-        <code>labels()</code>.
+        the call, and the command does that for you when the file contains no
+        <code>labels()</code> at all.
       </p>
       <p>
         <b>3.0 <code>withoutLabel()</code></b>, singular, is a different feature:
@@ -1525,9 +1525,11 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
         genuinely what you want.
       </p>
       <p>
-        If you had both <code>withoutLabels()</code> and <code>labels()</code> on
-        one chain, the command refuses to guess and flags it &mdash; that
-        combination was contradictory in 2.x, since the labels were ignored.
+        If the file also uses <code>labels()</code> anywhere, the command leaves
+        <code>withoutLabels()</code> alone and flags it rather than guessing which
+        chain it belongs to. Where it sat on a chain <em>with</em>
+        <code>labels()</code>, that combination was contradictory in 2.x &mdash;
+        the labels were ignored &mdash; so decide which one you meant.
       </p>
     </section>
 

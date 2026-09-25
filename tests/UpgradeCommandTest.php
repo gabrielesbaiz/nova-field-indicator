@@ -100,7 +100,7 @@ it('drops withoutLabels when it was a no-op', function () {
     expect($result)->not->toContain('withoutLabels');
 });
 
-it('keeps withoutLabels when labels are also set, and reports it', function () {
+it('keeps withoutLabels when the file also uses labels, and reports it', function () {
     $body = <<<'PHP'
         <?php
         NovaFieldIndicator::make('Status')->labels(['a' => 'A'])->withoutLabels();
@@ -109,7 +109,7 @@ it('keeps withoutLabels when labels are also set, and reports it', function () {
     $path = writeResource($body);
 
     $this->artisan('nova-field-indicator:upgrade')
-        ->expectsOutputToContain('contradictory')
+        ->expectsOutputToContain('left in place')
         ->assertSuccessful();
 
     expect(File::get($path))->toContain('withoutLabels');

@@ -142,15 +142,17 @@ is worth being explicit.
 **2.x `withoutLabels()`** meant *"print the raw value instead of a mapped
 label"*. In 3.0 that is simply the default: an unmapped value falls back to
 itself, exactly as Nova's own `Badge` behaves. So in almost every case you just
-delete the call, and the upgrade command does that for you when the chain has
-no `->labels()`.
+delete the call, and the upgrade command does that for you when the file
+contains no `->labels()` at all.
 
 **3.0 `withoutLabel()`**, singular, is a different feature: render the mark with
 **no text at all**. Reach for it only if that is genuinely what you want.
 
-If you had `->withoutLabels()` *and* `->labels()` on the same chain, the command
-refuses to guess and flags it — that combination was contradictory in 2.x, since
-the labels were ignored.
+If the file also uses `->labels()` anywhere, the command leaves
+`->withoutLabels()` alone and flags it instead of guessing which chain it
+belongs to. Delete it by hand where it was a no-op; where it sat on a chain
+with `->labels()`, that combination was contradictory in 2.x — the labels were
+ignored — so decide which one you meant.
 
 ### 6. Value comparison is stricter, in one specific way
 
