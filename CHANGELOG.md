@@ -52,7 +52,7 @@ A full rewrite. See [UPGRADE.md](UPGRADE.md) before upgrading — and run
   once rather than at every call site.
 - English and Italian translations.
 - `php artisan nova-field-indicator:upgrade` to migrate from 2.x.
-- Real test coverage: 163 Pest tests and 17 Vitest tests, PHPStan level 6.
+- Real test coverage: 164 Pest tests and 22 Vitest tests, PHPStan level 6.
 
 ### Changed
 

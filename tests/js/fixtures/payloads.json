@@ -1,0 +1,114 @@
+{
+    "enum": {
+        "indicators": [
+            {
+                "value": "active",
+                "label": "Active",
+                "ariaLabel": "Active",
+                "tooltip": null,
+                "color": {
+                    "token": "success",
+                    "light": "rgba(var(--colors-green-500))",
+                    "dark": "rgba(var(--colors-green-400))",
+                    "soft": "color-mix(in srgb, rgba(var(--colors-green-500)) 15%, transparent)"
+                },
+                "icon": {
+                    "name": "check-circle",
+                    "type": "solid"
+                },
+                "pulse": false
+            }
+        ],
+        "shape": "dot",
+        "size": "md",
+        "shouldHide": false,
+        "emptyText": "—"
+    },
+    "pill": {
+        "indicators": [
+            {
+                "value": "a",
+                "label": "a",
+                "ariaLabel": "a",
+                "tooltip": null,
+                "color": {
+                    "token": "danger",
+                    "light": "rgba(var(--colors-red-500))",
+                    "dark": "rgba(var(--colors-red-400))",
+                    "soft": "color-mix(in srgb, rgba(var(--colors-red-500)) 15%, transparent)"
+                },
+                "icon": null,
+                "pulse": false
+            }
+        ],
+        "shape": "pill",
+        "size": "lg",
+        "shouldHide": false,
+        "emptyText": "—"
+    },
+    "multi": {
+        "indicators": [
+            {
+                "value": "x",
+                "label": "x",
+                "ariaLabel": "x",
+                "tooltip": null,
+                "color": {
+                    "token": "success",
+                    "light": "rgba(var(--colors-green-500))",
+                    "dark": "rgba(var(--colors-green-400))",
+                    "soft": "color-mix(in srgb, rgba(var(--colors-green-500)) 15%, transparent)"
+                },
+                "icon": null,
+                "pulse": false
+            },
+            {
+                "value": "y",
+                "label": "y",
+                "ariaLabel": "y",
+                "tooltip": null,
+                "color": {
+                    "token": "info",
+                    "light": "rgba(var(--colors-sky-500))",
+                    "dark": "rgba(var(--colors-sky-400))",
+                    "soft": "color-mix(in srgb, rgba(var(--colors-sky-500)) 15%, transparent)"
+                },
+                "icon": null,
+                "pulse": false
+            }
+        ],
+        "shape": "dot",
+        "size": "md",
+        "shouldHide": false,
+        "emptyText": "—"
+    },
+    "nolabel": {
+        "indicators": [
+            {
+                "value": "a",
+                "label": null,
+                "ariaLabel": "Status: Active",
+                "tooltip": null,
+                "color": {
+                    "token": "gray",
+                    "light": "rgba(var(--colors-gray-400))",
+                    "dark": "rgba(var(--colors-gray-400))",
+                    "soft": "color-mix(in srgb, rgba(var(--colors-gray-400)) 15%, transparent)"
+                },
+                "icon": null,
+                "pulse": false
+            }
+        ],
+        "shape": "dot",
+        "size": "md",
+        "shouldHide": false,
+        "emptyText": "—"
+    },
+    "hidden": {
+        "indicators": [],
+        "shape": "dot",
+        "size": "md",
+        "shouldHide": true,
+        "emptyText": "—"
+    }
+}
