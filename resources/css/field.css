@@ -1,0 +1,162 @@
+/*
+ * Nova Field Indicator
+ *
+ * There is exactly one colour literal in this file — the neutral fallback.
+ * Everything else arrives as an inline custom property resolved by PHP against
+ * Nova's own --colors-<family>-<shade> variables, so re-theming Nova re-themes
+ * every indicator. 2.x shipped fifteen hard-coded Tailwind v1 hexes here and
+ * relied on stylesheet source order to pick the right one.
+ */
+
+.nfi-group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.nfi {
+    /* Sizes below override these three; the defaults are the md bundle. */
+    --nfi-mark: 0.5rem;
+    --nfi-ring: 2px;
+    --nfi-gap: 0.375rem;
+    --nfi-text: 0.875rem;
+
+    /* The resolved colour for the active theme. */
+    --nfi-c: var(--nfi-color);
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nfi-gap);
+    white-space: nowrap;
+    font-size: var(--nfi-text);
+    line-height: 1.25rem;
+}
+
+/*
+ * Nova's palette variables are not semantic: --colors-green-500 is the same
+ * value in both themes. Dark mode works by picking a *different shade*, which
+ * is why PHP resolves and sends two values rather than one.
+ */
+.dark .nfi {
+    --nfi-c: var(--nfi-color-dark, var(--nfi-color));
+}
+
+.nfi-mark {
+    flex: none;
+    width: var(--nfi-mark);
+    height: var(--nfi-mark);
+    background-color: var(--nfi-c);
+    border-radius: 9999px;
+}
+
+.nfi-label {
+    min-width: 0;
+}
+
+.nfi-icon {
+    flex: none;
+    width: 1em;
+    height: 1em;
+    color: var(--nfi-c);
+}
+
+.nfi-empty {
+    color: rgba(var(--colors-gray-400));
+}
+
+/* ---------------------------------------------------------------- shapes */
+
+.nfi[data-shape="ring"] .nfi-mark {
+    background-color: transparent;
+    border: var(--nfi-ring) solid var(--nfi-c);
+}
+
+.nfi[data-shape="square"] .nfi-mark {
+    border-radius: 0.125rem;
+}
+
+/*
+ * The pill tints itself from the same single colour variable via color-mix,
+ * which is what keeps one colour mechanism across every shape. Reusing Nova's
+ * <Badge> instead would mean colouring by Tailwind class names that only exist
+ * if Nova's own build happened to emit them.
+ */
+.nfi[data-shape="pill"] {
+    padding: 0 0.5rem;
+    min-height: 1.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    background-color: var(--nfi-soft);
+    color: color-mix(in srgb, var(--nfi-c) 80%, black);
+}
+
+.dark .nfi[data-shape="pill"] {
+    background-color: color-mix(in srgb, var(--nfi-c) 28%, transparent);
+    color: color-mix(in srgb, var(--nfi-c) 85%, white);
+}
+
+/* Three lines of insurance for engines without color-mix(). */
+@supports not (color: color-mix(in srgb, red, blue)) {
+    .nfi[data-shape="pill"] {
+        background-color: transparent;
+        border: 1px solid var(--nfi-c);
+        color: inherit;
+    }
+}
+
+/* ----------------------------------------------------------------- sizes */
+
+.nfi[data-size="sm"] {
+    --nfi-mark: 0.375rem;
+    --nfi-ring: 1.5px;
+    --nfi-gap: 0.25rem;
+    --nfi-text: 0.75rem;
+}
+
+.nfi[data-size="md"] {
+    --nfi-mark: 0.5rem;
+    --nfi-ring: 2px;
+    --nfi-gap: 0.375rem;
+    --nfi-text: 0.875rem;
+}
+
+.nfi[data-size="lg"] {
+    --nfi-mark: 0.75rem;
+    --nfi-ring: 2.5px;
+    --nfi-gap: 0.5rem;
+    --nfi-text: 1rem;
+}
+
+/* ----------------------------------------------------------------- pulse */
+
+/*
+ * Gated on the user's motion preference rather than merely respecting it:
+ * without the query the animation would run for everyone.
+ */
+@media (prefers-reduced-motion: no-preference) {
+    .nfi-pulse .nfi-mark {
+        animation: nfi-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes nfi-pulse {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.4;
+        }
+    }
+}
+
+/*
+ * Forced-colors mode flattens background-color, which would erase every mark.
+ * The accessible name still carries the meaning, but keep the shape visible.
+ */
+@media (forced-colors: active) {
+    .nfi-mark {
+        forced-color-adjust: none;
+        border: 1px solid CanvasText;
+    }
+}
