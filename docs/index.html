@@ -1,0 +1,1994 @@
+<title>Nova Field Indicator — colour-coded status fields for Laravel Nova</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="A colour-coded status indicator field for Laravel Nova. Enum-first, the whole Tailwind palette, four shapes, dark mode and an index filter.">
+<meta property="og:title" content="Nova Field Indicator">
+<meta property="og:description" content="A status column whose colours are yours, whose states come from an enum, and which still reads correctly in dark mode and to a screen reader.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gabrielesbaiz.github.io/nova-field-indicator/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nova Field Indicator">
+<meta name="twitter:description" content="Colour-coded status fields for Laravel Nova. Enum-first, accessible, dark-mode aware.">
+<link rel="canonical" href="https://gabrielesbaiz.github.io/nova-field-indicator/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%2300c2a8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+/* ── tokens ──────────────────────────────────────────────────────────────
+   The accent is a jade-cyan on purpose: it is not one of the four semantic
+   colours this package ships, so a demo indicator never reads as "this
+   example is a success state" just because the chrome around it is green. */
+:root{
+  --paper:#fbfbfa; --ink:#101113; --sub:#4b4f55; --muted:#686d74;
+  --rule:#e3e4e2; --wash:#f1f2f0;
+  --accent:#00c2a8; --accent-text:#006d5d; --accent-ink:#00201b;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0c0d10; --ink:#f3f4f6; --sub:#a9aeb7; --muted:#7b8089;
+    --rule:#23262c; --wash:#15171b;
+    --accent:#2ee6c5; --accent-text:#2ee6c5; --accent-ink:#04201b;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0c0d10; --ink:#f3f4f6; --sub:#a9aeb7; --muted:#7b8089;
+  --rule:#23262c; --wash:#15171b;
+  --accent:#2ee6c5; --accent-text:#2ee6c5; --accent-ink:#04201b;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:Chivo,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+  padding-top:3.6rem}
+:focus-visible{outline:2px solid var(--accent-text);outline-offset:3px}
+h1,h2,h3{letter-spacing:-.03em}
+
+.mx{max-width:74rem;margin:0 auto;padding-inline:clamp(1.1rem,4vw,2.6rem)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--accent-text);margin:0}
+.num{font-variant-numeric:tabular-nums}
+.hidden{display:none!important}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.reveal.seen{opacity:1;transform:none}
+
+.btn{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-weight:700;
+  font-size:.92rem;padding:.8rem 1.25rem;background:var(--ink);color:var(--paper);
+  transition:background .18s,color .18s;border-radius:.4rem}
+.btn:hover{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+.btn.ghost:hover{border-color:var(--accent-text);color:var(--accent-text)}
+
+/* ── masthead ─────────────────────────────────────────────────────────── */
+.top{position:fixed;top:0;left:0;right:0;z-index:50;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--rule)}
+.top .in{display:flex;align-items:center;gap:.9rem;height:3.6rem}
+.top .brand{display:inline-flex;align-items:center;gap:.55rem;font-weight:900;
+  letter-spacing:-.03em;font-size:1rem;text-decoration:none;white-space:nowrap;color:var(--ink)}
+.top .brand .bdot{width:.6rem;height:.6rem;border-radius:999px;background:var(--accent);flex:none}
+.top .ver{font-family:"IBM Plex Mono",monospace;font-size:.68rem;color:var(--accent-text);
+  background:color-mix(in srgb,var(--accent) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent-text) 35%,transparent);
+  padding:.1rem .42rem;border-radius:999px}
+.top nav{display:none;align-items:center;gap:.15rem;margin-left:auto;font-size:.84rem}
+@media(min-width:1080px){.top nav{display:flex}}
+.top nav a{text-decoration:none;color:var(--sub);padding:.36rem .7rem;border-radius:.4rem;border:1px solid transparent}
+.top nav a:hover{color:var(--ink)}
+.top nav a[aria-current="true"]{color:var(--accent-text);
+  border-color:color-mix(in srgb,var(--accent-text) 55%,transparent);
+  background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.top nav a.sponsor{color:var(--accent-text);font-weight:700}
+.top .tools{display:flex;align-items:center;gap:.45rem;margin-left:auto}
+@media(min-width:1080px){.top .tools{margin-left:.6rem}}
+.top .search{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;font:inherit;
+  font-size:.8rem;color:var(--muted);background:var(--wash);border:1px solid var(--rule);
+  border-radius:999px;padding:.32rem .55rem .32rem .7rem}
+.top .search svg{width:.8rem;height:.8rem;fill:none;stroke:currentColor;stroke-width:1.8}
+.top .search kbd{font-family:"IBM Plex Mono",monospace;font-size:.64rem;border:1px solid var(--rule);
+  border-radius:.25rem;padding:.06rem .3rem}
+.top .mode{font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;background:var(--ink);
+  color:var(--paper);border:1px solid var(--ink);padding:.36rem .8rem;border-radius:.4rem}
+.top .mode:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.progress{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--accent-text);transition:width .08s linear}
+/* Below ~430px the brand, the search pill and the theme button compete for
+   one row; the pill gives up its label first. */
+@media(max-width:430px){
+  .top .search span{display:none}
+  .top .search{padding:.32rem .55rem}
+  .top .brand{font-size:.9rem;gap:.4rem}
+  .top .ver{font-size:.62rem}
+  .mx{padding-inline:1rem}
+}
+
+/* ── command palette ──────────────────────────────────────────────────── */
+.pal[hidden]{display:none}
+.pal{position:fixed;inset:0;z-index:80;display:grid;place-items:start center;
+  padding-top:clamp(3rem,12vh,8rem);background:color-mix(in srgb,var(--ink) 38%,transparent);backdrop-filter:blur(3px)}
+.pal .box{width:min(34rem,92vw);background:var(--paper);border:1px solid var(--rule);
+  border-radius:.6rem;overflow:hidden;box-shadow:0 30px 70px -30px rgba(0,0,0,.5)}
+.pal input{width:100%;border:0;border-bottom:1px solid var(--rule);background:transparent;
+  color:var(--ink);font:inherit;font-size:1rem;padding:1rem 1.1rem;outline:none}
+.pal ul{list-style:none;margin:0;padding:.4rem;max-height:52vh;overflow-y:auto}
+.pal li{display:flex;align-items:baseline;gap:.7rem;padding:.6rem .7rem;cursor:pointer;
+  font-size:.9rem;color:var(--sub);border-radius:.35rem}
+.pal li b{font-weight:700;color:var(--ink)}
+.pal li em{font-style:normal;margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:.66rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.pal li[aria-selected="true"]{background:var(--wash)}
+.pal li[aria-selected="true"] b{color:var(--accent-text)}
+</style>
+<style>
+/* ── the indicator itself ─────────────────────────────────────────────────
+   These rules are copied from resources/css/field.css, so every indicator on
+   this site is rendered by the same CSS the package ships — not a drawing of
+   one. The --colors-* variables below stand in for the ones Nova defines at
+   :root in a real application. */
+.nfi{--nfi-mark:.5rem;--nfi-ring:2px;--nfi-gap:.375rem;--nfi-text:.875rem;
+  --nfi-c:var(--nfi-color);
+  display:inline-flex;align-items:center;gap:var(--nfi-gap);white-space:nowrap;
+  font-size:var(--nfi-text);line-height:1.25rem;font-family:Chivo,sans-serif}
+.dark .nfi{--nfi-c:var(--nfi-color-dark,var(--nfi-color))}
+.nfi-mark{flex:none;width:var(--nfi-mark);height:var(--nfi-mark);
+  background-color:var(--nfi-c);border-radius:9999px}
+.nfi-icon{flex:none;width:1em;height:1em;color:var(--nfi-c)}
+.nfi[data-shape="ring"] .nfi-mark{background-color:transparent;border:var(--nfi-ring) solid var(--nfi-c)}
+.nfi[data-shape="square"] .nfi-mark{border-radius:.125rem}
+.nfi[data-shape="pill"]{padding:0 .5rem;min-height:1.5rem;border-radius:9999px;font-weight:700;
+  background-color:var(--nfi-soft);color:color-mix(in srgb,var(--nfi-c) 80%,black)}
+.dark .nfi[data-shape="pill"]{background-color:color-mix(in srgb,var(--nfi-c) 28%,transparent);
+  color:color-mix(in srgb,var(--nfi-c) 85%,white)}
+.nfi[data-size="sm"]{--nfi-mark:.375rem;--nfi-ring:1.5px;--nfi-gap:.25rem;--nfi-text:.75rem}
+.nfi[data-size="md"]{--nfi-mark:.5rem;--nfi-ring:2px;--nfi-gap:.375rem;--nfi-text:.875rem}
+.nfi[data-size="lg"]{--nfi-mark:.75rem;--nfi-ring:2.5px;--nfi-gap:.5rem;--nfi-text:1rem}
+@media (prefers-reduced-motion:no-preference){
+  .nfi-pulse .nfi-mark{animation:nfi-pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+  @keyframes nfi-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+}
+
+/* Nova's palette variables, as Nova emits them (channels only). */
+:root{
+  --colors-green-500:34,197,94;    --colors-green-400:74,222,128;
+  --colors-red-500:239,68,68;      --colors-red-400:248,113,113;
+  --colors-yellow-500:234,179,8;   --colors-yellow-300:253,224,71;
+  --colors-sky-500:14,165,233;     --colors-sky-400:56,189,248;
+  --colors-gray-400:148,163,184;   --colors-gray-900:15,23,42;
+  --colors-gray-100:241,245,249;   --colors-violet-500:139,92,246;
+  --colors-violet-400:167,139,250; --colors-orange-500:249,115,22;
+  --colors-emerald-500:16,185,129; --colors-emerald-600:5,150,105;
+  --colors-pink-500:236,72,153;    --colors-indigo-500:99,102,241;
+}
+
+/* ── a faithful Nova panel, to show the field in place ────────────────── */
+.novapanel{border:1px solid var(--rule);border-radius:.6rem;overflow:hidden;background:var(--paper)}
+.novapanel .bar{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;background:var(--wash);
+  border-bottom:1px solid var(--rule);font-family:"IBM Plex Mono",monospace;font-size:.66rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.novapanel table{width:100%;border-collapse:collapse;font-size:.88rem}
+.novapanel th{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);font-weight:500;padding:.6rem .9rem;border-bottom:1px solid var(--rule)}
+.novapanel td{padding:.62rem .9rem;border-bottom:1px solid var(--rule);color:var(--sub)}
+.novapanel tr:last-child td{border-bottom:0}
+.novapanel td.name{color:var(--ink);font-weight:700}
+
+/* ── code ─────────────────────────────────────────────────────────────── */
+.code{background:var(--wash);border:1px solid var(--rule);border-radius:.55rem;overflow:hidden}
+.code .lab{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  padding:.45rem .85rem;border-bottom:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+.code pre{margin:0;padding:.95rem 1.05rem;overflow-x:auto;font-family:"IBM Plex Mono",monospace;
+  font-size:.8rem;line-height:1.75;color:var(--ink)}
+.code .k{color:var(--accent-text);font-weight:500}
+.code .s{color:var(--sub)}
+.code .c{color:var(--muted);font-style:italic}
+.code .f{color:var(--ink);font-weight:500}
+.copybtn{font:inherit;font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.12em;
+  text-transform:uppercase;cursor:pointer;background:transparent;color:var(--muted);
+  border:1px solid var(--rule);border-radius:.3rem;padding:.12rem .45rem}
+.copybtn:hover{color:var(--accent-text);border-color:var(--accent-text)}
+
+.pair{display:grid;gap:1rem;grid-template-columns:1fr;align-items:start}
+@media(min-width:900px){.pair{grid-template-columns:1.05fr .95fr;gap:1.4rem}}
+.out{border:1px solid var(--rule);border-radius:.55rem;background:var(--paper);padding:1rem 1.1rem}
+.out .lab{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 .75rem}
+.rows{display:grid;gap:.55rem}
+</style>
+<style>
+/* ── hero: the status board ───────────────────────────────────────────── */
+.hero{padding-block:clamp(2.6rem,6vw,4.6rem);border-bottom:1px solid var(--rule)}
+.hero .grid{display:grid;gap:clamp(2rem,5vw,3.4rem);grid-template-columns:1fr;align-items:center}
+@media(min-width:1000px){.hero .grid{grid-template-columns:1.02fr .98fr}}
+.hero h1{font-size:clamp(2.5rem,6.4vw,4.4rem);font-weight:900;line-height:.98;
+  letter-spacing:-.045em;margin:1rem 0 0;max-width:13ch}
+.hero h1 em{font-style:normal;color:var(--accent-ink);background:var(--accent);
+  padding:0 .12em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.hero .lede{font-size:1.06rem;line-height:1.7;color:var(--sub);max-width:36rem;margin:1.25rem 0 0}
+.hero .cta{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.8rem}
+.hero .facts{display:flex;flex-wrap:wrap;gap:1.6rem;margin-top:2rem;
+  font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted)}
+.hero .facts b{display:block;font-family:Chivo,sans-serif;font-size:1.35rem;letter-spacing:-.03em;
+  color:var(--ink);text-transform:none;margin-bottom:.1rem}
+
+/* The board: every cell is a real indicator mark, driven by the same
+   --nfi-color custom property the package uses. */
+.board{border:1px solid var(--rule);border-radius:.7rem;background:var(--wash);padding:1.1rem;
+  display:grid;grid-template-columns:repeat(18,1fr);gap:.42rem}
+.board i{display:block;aspect-ratio:1;border-radius:999px;background:rgba(var(--colors-gray-400));
+  opacity:.28;transition:background .5s ease,opacity .5s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
+.board i.lit{opacity:1;transform:scale(1.08)}
+.boardcap{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.85rem;
+  font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted)}
+.boardcap span{display:inline-flex;align-items:center;gap:.4rem}
+.boardcap b{width:.5rem;height:.5rem;border-radius:999px;display:inline-block}
+
+/* ── landing bands ────────────────────────────────────────────────────── */
+.band{padding-block:clamp(2.6rem,6vw,4.4rem);border-bottom:1px solid var(--rule)}
+.band h2{font-size:clamp(1.6rem,3.6vw,2.4rem);font-weight:900;margin:.7rem 0 0;max-width:22ch}
+.band p.lede{font-size:1rem;line-height:1.72;color:var(--sub);max-width:38rem;margin:1rem 0 0}
+.band .n{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.2em;color:var(--accent-text)}
+.cols3{display:grid;gap:1.4rem;grid-template-columns:1fr;margin-top:2rem}
+@media(min-width:820px){.cols3{grid-template-columns:repeat(3,1fr)}}
+.card{border:1px solid var(--rule);border-radius:.6rem;padding:1.2rem 1.25rem;background:var(--paper)}
+.card h3{font-size:1.02rem;font-weight:800;margin:.7rem 0 .45rem}
+.card p{margin:0;font-size:.9rem;line-height:1.66;color:var(--sub)}
+
+/* ── docs pages ───────────────────────────────────────────────────────── */
+.docs{display:grid;gap:clamp(1.8rem,3.4vw,3rem);grid-template-columns:1fr;padding-block:clamp(2rem,4vw,3rem)}
+@media(min-width:1000px){.docs{grid-template-columns:14rem minmax(0,1fr)}}
+@media(min-width:1280px){.docs{grid-template-columns:14rem minmax(0,1fr) 13rem}}
+.sidenav,.onthispage{display:none}
+@media(min-width:1000px){.sidenav{display:block;position:sticky;top:5rem;align-self:start;
+  max-height:calc(100vh - 7rem);overflow-y:auto}}
+@media(min-width:1280px){.onthispage{display:block;position:sticky;top:5rem;align-self:start;
+  max-height:calc(100vh - 7rem);overflow-y:auto}}
+.sidenav h4,.onthispage h4{font-family:"IBM Plex Mono",monospace;font-size:.66rem;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 .7rem}
+.sidenav .group+.group{margin-top:1.5rem}
+.sidenav ul{list-style:none;margin:0;padding:0;display:grid;gap:.1rem}
+.sidenav a{display:block;text-decoration:none;color:var(--sub);font-size:.88rem;
+  padding:.3rem .6rem;border-left:2px solid var(--rule)}
+.sidenav a:hover{color:var(--ink)}
+.sidenav a[aria-current="page"]{color:var(--accent-text);border-left-color:var(--accent-text);
+  font-weight:700;background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.onthispage ol{list-style:none;margin:0;padding:0;display:grid;gap:.1rem;counter-reset:toc}
+.onthispage a{display:flex;gap:.6rem;text-decoration:none;color:var(--sub);font-size:.84rem;
+  padding:.28rem .5rem;border-left:2px solid var(--rule)}
+.onthispage a::before{counter-increment:toc;content:counter(toc,decimal-leading-zero);
+  font-family:"IBM Plex Mono",monospace;font-size:.66rem;color:var(--muted)}
+.onthispage a:hover{color:var(--ink)}
+.onthispage a[aria-current="true"]{color:var(--accent-text);border-left-color:var(--accent-text);font-weight:700}
+.onthispage a[aria-current="true"]::before{color:var(--accent-text)}
+
+.body{min-width:0}
+.body h1{font-size:2rem;font-weight:900;margin:0}
+.body>p.lede{font-size:1rem;line-height:1.7;color:var(--sub);max-width:40rem;margin:.7rem 0 0}
+.body section{padding-block:clamp(1.6rem,3vw,2.3rem);border-top:1px solid var(--rule);margin-top:1.6rem}
+.body section:first-of-type{margin-top:1.4rem}
+.body h2{font-size:clamp(1.3rem,2.6vw,1.7rem);font-weight:800;margin:0;scroll-margin-top:5rem}
+.body h3{font-size:1.02rem;font-weight:800;margin:1.6rem 0 .3rem}
+.body p{font-size:.96rem;line-height:1.72;color:var(--sub);max-width:40rem;margin:.9rem 0 0}
+.body ul,.body ol{font-size:.96rem;line-height:1.72;color:var(--sub);max-width:40rem;padding-left:1.15rem}
+.body li+li{margin-top:.4rem}
+.body code{font-family:"IBM Plex Mono",monospace;font-size:.86em;background:var(--wash);
+  border:1px solid var(--rule);border-radius:.25rem;padding:.06rem .3rem;color:var(--ink)}
+.body .code{margin-top:1.1rem}
+.body table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:1.1rem;display:block;overflow-x:auto}
+.body th{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);font-weight:500;padding:.55rem .7rem;
+  border-bottom:1px solid var(--rule);white-space:nowrap}
+.body td{padding:.55rem .7rem;border-bottom:1px solid var(--rule);color:var(--sub);vertical-align:top}
+.body td code{white-space:nowrap}
+.note{margin-top:1.3rem;border-left:3px solid var(--accent-text);background:var(--wash);
+  border-radius:0 .4rem .4rem 0;padding:.95rem 1.15rem;font-size:.9rem;line-height:1.7;color:var(--sub);max-width:40rem}
+.note b{color:var(--ink)}
+.pager{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  border-top:1px solid var(--rule);margin-top:2.4rem;padding-top:1.4rem}
+.pager a{text-decoration:none;font-size:.82rem;color:var(--muted)}
+.pager a b{display:block;font-size:1rem;font-weight:800;color:var(--ink);margin-top:.2rem}
+.pager a:hover b{color:var(--accent-text)}
+.pager .next{text-align:right;margin-left:auto}
+
+/* ── sponsor band ─────────────────────────────────────────────────────── */
+.support{border-top:1px solid var(--rule);padding-block:clamp(3.2rem,7vw,5.2rem)}
+.support .eyebrow{display:flex;align-items:center;gap:.7rem}
+.support .eyebrow::before{content:"";width:1.6rem;height:1px;background:var(--accent-text)}
+.support h2{font-size:clamp(1.9rem,5vw,3.2rem);font-weight:900;letter-spacing:-.035em;
+  line-height:1.02;margin:.9rem 0 0;max-width:16ch}
+.support h2 em{font-style:normal;color:var(--accent-ink);background:var(--accent);padding:0 .1em;
+  box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.support .top-grid{display:grid;gap:clamp(2rem,5vw,3.4rem);grid-template-columns:1fr;margin-top:1.4rem}
+@media(min-width:940px){.support .top-grid{grid-template-columns:1.15fr .85fr;align-items:start}}
+.support p.body{font-size:1rem;line-height:1.72;color:var(--sub);max-width:34rem;margin:1.1rem 0 0}
+.sponsor-card{border:1px solid var(--rule);border-radius:.6rem;background:var(--wash);padding:1.6rem}
+.sponsor-card .price{font-size:clamp(2.6rem,6vw,3.6rem);font-weight:900;letter-spacing:-.04em;
+  color:var(--accent-text);line-height:1}
+.sponsor-card .terms{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--muted);margin:.7rem 0 1.3rem}
+.sponsor-card .btn{width:100%;justify-content:center}
+.sponsor-card .fine{font-size:.78rem;color:var(--muted);margin:.9rem 0 0;text-align:center}
+.ways{display:grid;grid-template-columns:1fr;margin-top:2.6rem;border-top:1px solid var(--rule)}
+@media(min-width:720px){.ways{grid-template-columns:1fr 1fr}}
+@media(min-width:1040px){.ways{grid-template-columns:repeat(4,1fr)}}
+.ways .w{padding:1.4rem 1.3rem 1.6rem;border-bottom:1px solid var(--rule);position:relative}
+@media(min-width:1040px){.ways .w{border-right:1px solid var(--rule)}.ways .w:last-child{border-right:0}}
+.ways .tag{position:absolute;top:1.4rem;right:1.3rem;font-family:"IBM Plex Mono",monospace;font-size:.6rem;
+  letter-spacing:.16em;color:var(--accent-text);
+  border:1px solid color-mix(in srgb,var(--accent-text) 40%,transparent);padding:.1rem .4rem;border-radius:999px}
+.ways h3{font-size:1rem;font-weight:800;margin:.8rem 0 .45rem}
+.ways p{margin:0;font-size:.88rem;line-height:1.62;color:var(--sub)}
+.why{margin-top:2.2rem;border-left:3px solid var(--accent-text);background:var(--wash);
+  border-radius:0 .4rem .4rem 0;padding:1.1rem 1.3rem;font-size:.92rem;line-height:1.7;color:var(--sub)}
+.why b{color:var(--ink)}
+
+/* ── footer ───────────────────────────────────────────────────────────── */
+.sitefoot{border-top:1px solid var(--rule);background:var(--wash);padding-block:clamp(2.6rem,5vw,3.6rem)}
+.sitefoot .cols{display:grid;gap:2rem;grid-template-columns:repeat(2,1fr)}
+@media(min-width:880px){.sitefoot .cols{grid-template-columns:repeat(4,1fr)}}
+.sitefoot h4{font-family:"IBM Plex Mono",monospace;font-size:.66rem;font-weight:500;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 1rem}
+.sitefoot ul{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
+.sitefoot a{text-decoration:none;color:var(--sub);font-size:.9rem}
+.sitefoot a:hover{color:var(--accent-text)}
+.sitefoot .base{display:flex;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;
+  border-top:1px solid var(--rule);margin-top:2.4rem;padding-top:1.3rem;font-size:.8rem;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important}
+  .reveal{opacity:1;transform:none}
+  .board i{opacity:1}
+}
+</style>
+
+<header class="top">
+  <div class="mx in">
+    <a class="brand" href="#/home"><span class="bdot" aria-hidden="true"></span>Nova Field Indicator <span class="ver">v3.0.0</span></a>
+    <nav id="nav">
+      <a href="#/install">Install</a>
+      <a href="#/guide">Guide</a>
+      <a href="#/colors">Colours</a>
+      <a href="#/configuration">Config</a>
+      <a href="#/api">API</a>
+      <a href="#/upgrade">Upgrade</a>
+      <a class="sponsor" href="https://github.com/sponsors/gabrielesbaiz">&#9829; Sponsor</a>
+    </nav>
+    <div class="tools">
+      <button class="search" id="openPal" aria-label="Search the documentation" aria-keyshortcuts="Meta+K">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.4 10.4 14 14"/></svg>
+        <span>Search</span><kbd id="kbd">&#8984;K</kbd>
+      </button>
+      <button class="mode" id="mode">Dark</button>
+    </div>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+
+<div class="pal" id="pal" hidden>
+  <div class="box" role="dialog" aria-modal="true" aria-label="Search the documentation">
+    <input id="palInput" type="text" placeholder="Jump to&hellip;" autocomplete="off" spellcheck="false">
+    <ul id="palList" role="listbox"></ul>
+  </div>
+</div>
+
+<main>
+
+<!-- ══ HOME ══════════════════════════════════════════════════════════ -->
+<section class="page" id="home">
+
+  <div class="hero">
+    <div class="mx grid">
+      <div>
+        <p class="eyebrow">Laravel Nova 5 &middot; field</p>
+        <h1>Status you can <em>read</em> at a glance.</h1>
+        <p class="lede">
+          A colour-coded indicator field for Laravel Nova. It takes the enum your
+          application already has and renders a dot, ring, square or pill that
+          says what the value means &mdash; in light mode, in dark mode, and to a
+          screen reader.
+        </p>
+        <div class="cta">
+          <a class="btn" href="#/install">Get started</a>
+          <a class="btn ghost" href="https://github.com/gabrielesbaiz/nova-field-indicator">View on GitHub</a>
+        </div>
+        <div class="facts">
+          <div><b class="num">1.09 kB</b>JS, gzipped</div>
+          <div><b class="num">180</b>tests</div>
+          <div><b class="num">0</b>runtime deps</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="board" id="board" aria-hidden="true"></div>
+        <div class="boardcap">
+          <span><b style="background:rgba(var(--colors-green-500))"></b>success</span>
+          <span><b style="background:rgba(var(--colors-red-500))"></b>danger</span>
+          <span><b style="background:rgba(var(--colors-yellow-500))"></b>warning</span>
+          <span><b style="background:rgba(var(--colors-sky-500))"></b>info</span>
+          <span><b style="background:rgba(var(--colors-gray-400))"></b>unset</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- smallest real sample, immediately below the hero -->
+  <div class="band">
+    <div class="mx">
+      <p class="eyebrow">The whole thing</p>
+      <h2>One enum in, a status column out.</h2>
+      <p class="lede">
+        If the attribute is cast to a backed enum and that enum describes itself,
+        this is the entire configuration.
+      </p>
+
+      <div class="pair" style="margin-top:1.6rem">
+        <div class="code">
+          <div class="lab"><span>app/Nova/User.php</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="k">use</span> Gabrielesbaiz\NovaFieldIndicator\<span class="f">NovaFieldIndicator</span>;
+
+<span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)
+    -&gt;<span class="f">enum</span>(<span class="f">Status</span>::<span class="k">class</span>)
+    -&gt;<span class="f">withIcons</span>()
+    -&gt;<span class="f">filterable</span>(),</pre>
+        </div>
+
+        <div class="out">
+          <p class="lab">Rendered on the index</p>
+          <div class="novapanel">
+            <div class="bar">Users</div>
+            <table>
+              <tr><th>Name</th><th>Status</th></tr>
+              <tr><td class="name">Ada Lovelace</td><td>
+                <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-green-500));--nfi-color-dark:rgba(var(--colors-green-400))">
+                  <span class="nfi-mark"></span><span>Active</span></span></td></tr>
+              <tr><td class="name">Grace Hopper</td><td>
+                <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-sky-500));--nfi-color-dark:rgba(var(--colors-sky-400))">
+                  <span class="nfi-mark"></span><span>Invited</span></span></td></tr>
+              <tr><td class="name">Alan Turing</td><td>
+                <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-red-500));--nfi-color-dark:rgba(var(--colors-red-400))">
+                  <span class="nfi-mark"></span><span>Banned</span></span></td></tr>
+            </table>
+          </div>
+          <p style="font-size:.82rem;color:var(--muted);margin:.8rem 0 0;line-height:1.6">
+            Labels, colours and icons all come from the enum. Nothing is repeated
+            in the resource.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="mx">
+      <p class="eyebrow"><span class="n">01</span> &nbsp;Not just four colours</p>
+      <h2>The whole palette, and your own.</h2>
+      <p class="lede">
+        Colours resolve to Nova&rsquo;s own <code>--colors-*</code> variables, so any
+        Tailwind family and shade works &mdash; and re-theming Nova re-themes every
+        indicator. Literal CSS colours and explicit light/dark pairs are
+        first-class too.
+      </p>
+
+      <div class="pair" style="margin-top:1.6rem">
+        <div class="code">
+          <div class="lab"><span>Four ways to name a colour</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">colors</span>([
+    <span class="s">'active'</span>   =&gt; <span class="s">'success'</span>,        <span class="c">// a semantic token</span>
+    <span class="s">'archived'</span> =&gt; <span class="s">'emerald-600'</span>,    <span class="c">// any family and shade</span>
+    <span class="s">'brand'</span>    =&gt; <span class="s">'#7c3aed'</span>,        <span class="c">// a literal</span>
+    <span class="s">'custom'</span>   =&gt; [<span class="s">'light'</span> =&gt; <span class="s">'violet-600'</span>, <span class="s">'dark'</span> =&gt; <span class="s">'violet-400'</span>],
+]),</pre>
+        </div>
+        <div class="out">
+          <p class="lab">Rendered</p>
+          <div class="rows">
+            <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-green-500));--nfi-color-dark:rgba(var(--colors-green-400))"><span class="nfi-mark"></span><span>active</span></span>
+            <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-emerald-600));--nfi-color-dark:rgba(var(--colors-emerald-500))"><span class="nfi-mark"></span><span>archived</span></span>
+            <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:#7c3aed;--nfi-color-dark:#7c3aed"><span class="nfi-mark"></span><span>brand</span></span>
+            <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-violet-500));--nfi-color-dark:rgba(var(--colors-violet-400))"><span class="nfi-mark"></span><span>custom</span></span>
+          </div>
+          <p style="font-size:.82rem;color:var(--muted);margin:1rem 0 0;line-height:1.6">
+            Switch the theme in the masthead &mdash; the first, second and fourth
+            shift shade; the literal deliberately does not.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="mx">
+      <p class="eyebrow"><span class="n">02</span> &nbsp;Four shapes, three sizes</p>
+      <h2>A shape can carry meaning too.</h2>
+      <p class="lede">
+        Colour alone fails about one man in twelve, and fails everyone in a
+        greyscale print. A distinct shape per state is one of the three ways this
+        package lets you avoid relying on it.
+      </p>
+
+      <div class="pair" style="margin-top:1.6rem">
+        <div class="code">
+          <div class="lab"><span>Shapes</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">dot</span>(),
+<span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">ring</span>(),
+<span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">square</span>(),
+<span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">pill</span>(),
+
+<span class="c">// and a state that is still happening</span>
+<span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">states</span>([
+    <span class="s">'syncing'</span> =&gt; [<span class="s">'label'</span> =&gt; <span class="s">'Syncing'</span>, <span class="s">'color'</span> =&gt; <span class="s">'sky-400'</span>, <span class="s">'pulse'</span> =&gt; <span class="k">true</span>],
+]),</pre>
+        </div>
+        <div class="out">
+          <p class="lab">Rendered</p>
+          <div class="rows">
+            <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-green-500));--nfi-color-dark:rgba(var(--colors-green-400))"><span class="nfi-mark"></span><span>Dot &mdash; the default</span></span>
+            <span class="nfi" data-shape="ring" data-size="md" style="--nfi-color:rgba(var(--colors-yellow-500));--nfi-color-dark:rgba(var(--colors-yellow-300))"><span class="nfi-mark"></span><span>Ring &mdash; pending</span></span>
+            <span class="nfi" data-shape="square" data-size="md" style="--nfi-color:rgba(var(--colors-indigo-500));--nfi-color-dark:rgba(var(--colors-indigo-500))"><span class="nfi-mark"></span><span>Square &mdash; queued</span></span>
+            <span class="nfi" data-shape="pill" data-size="md" style="--nfi-color:rgba(var(--colors-red-500));--nfi-color-dark:rgba(var(--colors-red-400));--nfi-soft:color-mix(in srgb, rgba(var(--colors-red-500)) 15%, transparent)"><span>Pill &mdash; failed</span></span>
+            <span class="nfi nfi-pulse" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-sky-400));--nfi-color-dark:rgba(var(--colors-sky-400))"><span class="nfi-mark"></span><span>Syncing &mdash; pulsing</span></span>
+          </div>
+          <p style="font-size:.82rem;color:var(--muted);margin:1rem 0 0;line-height:1.6">
+            The pulse is wrapped in <code>prefers-reduced-motion</code>, so it
+            never overrides a stated preference.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="mx">
+      <p class="eyebrow"><span class="n">03</span> &nbsp;Resolved on the server</p>
+      <h2>An index row carries a result, not a rulebook.</h2>
+      <p class="lede">
+        Version 2 pushed the whole label and colour configuration into
+        <em>every row</em> of an index and looked it up again in the browser. A
+        six-state field on fifty rows shipped its maps fifty times. Resolution now
+        happens once per value, in PHP.
+      </p>
+
+      <div class="pair" style="margin-top:1.6rem">
+        <div class="code">
+          <div class="lab"><span>2.x &mdash; per row</span></div>
+<pre><span class="c">// repeated on all 50 rows</span>
+{
+  <span class="s">"labels"</span>: { <span class="s">"active"</span>: <span class="s">"Active"</span>, <span class="s">"banned"</span>: <span class="s">"Banned"</span>, <span class="c">/* … */</span> },
+  <span class="s">"colors"</span>: { <span class="s">"active"</span>: <span class="s">"success"</span>, <span class="s">"banned"</span>: <span class="s">"danger"</span>, <span class="c">/* … */</span> },
+  <span class="s">"unknownLabel"</span>: <span class="s">"Unknown"</span>,
+  <span class="s">"withoutLabels"</span>: <span class="k">false</span>
+}</pre>
+        </div>
+        <div class="code">
+          <div class="lab"><span>3.0 &mdash; per row</span></div>
+<pre>{
+  <span class="s">"indicators"</span>: [{
+    <span class="s">"value"</span>: <span class="s">"active"</span>,
+    <span class="s">"label"</span>: <span class="s">"Active"</span>,
+    <span class="s">"ariaLabel"</span>: <span class="s">"Active"</span>,
+    <span class="s">"color"</span>: { <span class="s">"light"</span>: <span class="s">"rgba(var(--colors-green-500))"</span>, <span class="c">/* … */</span> },
+    <span class="s">"icon"</span>: <span class="k">null</span>, <span class="s">"pulse"</span>: <span class="k">false</span>
+  }],
+  <span class="s">"shape"</span>: <span class="s">"dot"</span>, <span class="s">"size"</span>: <span class="s">"md"</span>
+}</pre>
+        </div>
+      </div>
+
+      <div class="note" style="max-width:none">
+        <b>A side effect worth naming.</b> Because the browser no longer inspects
+        a colour string, colour literals are validated once, server-side, against
+        an anchored allow-list. The 2.x client-side regex was unanchored and would
+        have accepted <code>#fff; background-image:url(&hellip;)</code>.
+      </div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="mx">
+      <p class="eyebrow">Honest comparison</p>
+      <h2>When not to reach for this.</h2>
+      <p class="lede">
+        Nova already ships <code>Badge</code>, and for four hard-coded states it is
+        the right answer &mdash; it is built in, it needs no dependency, and
+        <code>->map()</code> covers a surprising amount. If
+        <code>success</code>, <code>info</code>, <code>danger</code> and
+        <code>warning</code> are all you need, use it and stop reading.
+      </p>
+      <div class="cols3">
+        <div class="card">
+          <h3>Use <code>Badge</code></h3>
+          <p>Four states, default styling, no colour of your own, and no need for
+          a filter or an icon. Fewer moving parts wins.</p>
+        </div>
+        <div class="card">
+          <h3>Use this package</h3>
+          <p>States come from an enum, you want a specific shade, you need dark
+          mode to be right, or colour must not be the only channel.</p>
+        </div>
+        <div class="card">
+          <h3>Use neither</h3>
+          <p>If the value is editable, it is a <code>Select</code>. This field is
+          <code>Unfillable</code> by contract and never writes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── sponsor band ──────────────────────────────────────────────── -->
+  <div class="support" id="support">
+    <div class="mx">
+      <p class="eyebrow">Support this package</p>
+      <h2>Free forever. Not free to <em>maintain</em>.</h2>
+
+      <div class="top-grid">
+        <div>
+          <p class="body">
+            The work you never see is the work that keeps a status column boring.
+            Nova moved its colours from <code>var(--success)</code> to a palette of
+            CSS variables between majors, and four of this field&rsquo;s documented
+            colours quietly stopped rendering &mdash; no error, no warning, just an
+            empty cell. Finding that, and the <code>is_callable()</code> branch that
+            was invoking a value as a callback, took far longer than writing either
+            fix. It stays MIT either way.
+          </p>
+          <p class="body">
+            Sponsorship buys the time to keep doing that: tracking Nova and Laravel
+            releases before your upgrade does, keeping 180 tests honest, and
+            answering issues from people who are not paying anything. It stays MIT
+            either way.
+          </p>
+        </div>
+
+        <div class="sponsor-card">
+          <div class="price">$5</div>
+          <p class="terms">per month &middot; cancel anytime</p>
+          <a class="btn" href="https://github.com/sponsors/gabrielesbaiz">&#9829; Become a sponsor</a>
+          <p class="fine">Company tiers get a logo in the README and on this page.</p>
+        </div>
+      </div>
+
+      <div class="ways">
+        <div class="w">
+          <span class="tag">Free</span>
+          <div style="font-size:1.3rem" aria-hidden="true">&#11088;</div>
+          <h3>Star the repo</h3>
+          <p>It is how other Nova developers find the package at all.</p>
+        </div>
+        <div class="w">
+          <span class="tag">Free</span>
+          <div style="font-size:1.3rem" aria-hidden="true">&#128027;</div>
+          <h3>Open a good issue</h3>
+          <p>A Nova version, a field definition and what you expected. That is a gift.</p>
+        </div>
+        <div class="w">
+          <div style="font-size:1.3rem" aria-hidden="true">&#10084;&#65039;</div>
+          <h3>Sponsor from $5</h3>
+          <p>Roughly one coffee a month, against every future Nova release.</p>
+        </div>
+        <div class="w">
+          <div style="font-size:1.3rem" aria-hidden="true">&#127970;</div>
+          <h3>Company tier</h3>
+          <p>If this runs in your admin panel at work, your employer can help.</p>
+        </div>
+      </div>
+
+      <div class="why">
+        <b>Why ask at all?</b> This package is MIT and always will be. Nothing is
+        paywalled, nothing phones home, and no <em>feature</em> is held back for
+        sponsors. Sponsorship buys maintenance time, not features &mdash; and if you
+        cannot sponsor, the star and the bug report genuinely help.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ INSTALL ═══════════════════════════════════════════════════════ -->
+<section class="page hidden" id="install">
+ <div class="mx docs">
+  <aside class="sidenav" data-nav aria-label="Documentation"></aside>
+  <div class="body">
+    <h1>Installation</h1>
+    <p class="lede">Three-oh requires a current stack. Check the table before you upgrade.</p>
+
+    <section id="install-req">
+      <h2>Requirements</h2>
+      <table>
+        <tr><th>&nbsp;</th><th>2.x</th><th>3.0</th></tr>
+        <tr><td>PHP</td><td><code>^8.0</code></td><td><code>^8.3</code></td></tr>
+        <tr><td>Laravel</td><td>10, 11, 12</td><td>12, 13</td></tr>
+        <tr><td>Nova</td><td><code>^5.0</code></td><td><code>^5.7</code> (<code>&lt;6.0</code>)</td></tr>
+      </table>
+      <p>
+        Nova 6 is explicitly conflicted rather than merely untested, so Composer
+        will refuse the combination instead of letting you find out at runtime.
+        <code>laravel/nova</code> is a runtime requirement in 3.0, not a dev
+        dependency.
+      </p>
+    </section>
+
+    <section id="install-composer">
+      <h2>Install</h2>
+      <div class="code">
+        <div class="lab"><span>Terminal</span><button class="copybtn" type="button">Copy</button></div>
+<pre>composer require gabrielesbaiz/nova-field-indicator</pre>
+      </div>
+      <p>
+        There is nothing to register. The service provider is auto-discovered and
+        adds its script and stylesheet inside <code>Nova::serving()</code>.
+      </p>
+    </section>
+
+    <section id="install-publish">
+      <h2>Publishing config and translations</h2>
+      <p>Both are optional &mdash; the defaults are usable as they are.</p>
+      <div class="code">
+        <div class="lab"><span>Terminal</span><button class="copybtn" type="button">Copy</button></div>
+<pre>php artisan vendor:publish --tag=nova-field-indicator-config
+php artisan vendor:publish --tag=nova-field-indicator-lang</pre>
+      </div>
+      <p>
+        English and Italian ship with the package. Labels pass through
+        <code>__()</code> by default, and Laravel returns an unknown key unchanged,
+        so this is a no-op until you translate something.
+      </p>
+    </section>
+
+    <section id="install-first">
+      <h2>Your first field</h2>
+      <div class="code">
+        <div class="lab"><span>app/Nova/User.php</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="k">use</span> Gabrielesbaiz\NovaFieldIndicator\<span class="f">NovaFieldIndicator</span>;
+
+<span class="k">public function</span> <span class="f">fields</span>(NovaRequest $request): <span class="k">array</span>
+{
+    <span class="k">return</span> [
+        <span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">colors</span>([
+            <span class="s">'active'</span>  =&gt; <span class="s">'success'</span>,
+            <span class="s">'banned'</span>  =&gt; <span class="s">'danger'</span>,
+            <span class="s">'invited'</span> =&gt; <span class="s">'info'</span>,
+        ]),
+    ];
+}</pre>
+      </div>
+      <p>
+        Labels are optional: an unmapped value falls back to itself, exactly as
+        Nova&rsquo;s own <code>Badge</code> behaves.
+      </p>
+      <div class="note">
+        <b>Coming from 2.x?</b> Read <a href="#/upgrade">Upgrading</a> first.
+        The <code>success</code>, <code>danger</code>, <code>warning</code> and
+        <code>info</code> colours rendered an invisible dot on Nova 5 and now
+        appear, so columns that looked empty will fill with colour.
+      </div>
+    </section>
+
+    <div class="pager">
+      <a href="#/home"><span>Previous</span><b>Home</b></a>
+      <a class="next" href="#/guide"><span>Next</span><b>Guide</b></a>
+    </div>
+  </div>
+  <aside class="onthispage" aria-label="On this page"><h4>On this page</h4><ol data-toc></ol></aside>
+ </div>
+</section>
+
+<!-- ══ GUIDE ═════════════════════════════════════════════════════════ -->
+<section class="page hidden" id="guide">
+ <div class="mx docs">
+  <aside class="sidenav" data-nav aria-label="Documentation"></aside>
+  <div class="body">
+    <h1>Guide</h1>
+    <p class="lede">Everything the field can do, in the order you are likely to need it.</p>
+
+    <section id="guide-states">
+      <h2>Labels, colours and icons</h2>
+      <p>
+        Each value gets a <em>state</em>. Configure the parts separately, or all
+        at once with <code>states()</code> &mdash; they write to the same table.
+      </p>
+      <div class="code">
+        <div class="lab"><span>Separately</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)
+    -&gt;<span class="f">labels</span>([<span class="s">'active'</span> =&gt; <span class="s">'Active'</span>, <span class="s">'banned'</span> =&gt; <span class="s">'Banned'</span>])
+    -&gt;<span class="f">colors</span>([<span class="s">'active'</span> =&gt; <span class="s">'success'</span>, <span class="s">'banned'</span> =&gt; <span class="s">'danger'</span>])
+    -&gt;<span class="f">icons</span>([<span class="s">'active'</span> =&gt; <span class="s">'check-circle'</span>, <span class="s">'banned'</span> =&gt; <span class="s">'x-circle'</span>]),</pre>
+      </div>
+      <div class="code">
+        <div class="lab"><span>Or together</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">states</span>([
+    <span class="s">'active'</span> =&gt; [
+        <span class="s">'label'</span>   =&gt; <span class="s">'Active'</span>,
+        <span class="s">'color'</span>   =&gt; <span class="s">'success'</span>,
+        <span class="s">'icon'</span>    =&gt; <span class="s">'check-circle'</span>,
+        <span class="s">'tooltip'</span> =&gt; <span class="s">'Account is active'</span>,
+    ],
+    <span class="s">'syncing'</span> =&gt; [<span class="s">'label'</span> =&gt; <span class="s">'Syncing'</span>, <span class="s">'color'</span> =&gt; <span class="s">'sky-400'</span>, <span class="s">'pulse'</span> =&gt; <span class="k">true</span>],
+]),</pre>
+      </div>
+      <p>
+        Calling <code>icons()</code> turns icons on by itself. Icons are
+        heroicons rendered by Nova&rsquo;s own component, so they add nothing to
+        this package&rsquo;s bundle.
+      </p>
+    </section>
+
+    <section id="guide-enum">
+      <h2>Enum-first</h2>
+      <p>
+        The shortest path. Implement one, two or all three contracts on an enum
+        you already have; anything you leave out falls back sensibly.
+      </p>
+      <div class="code">
+        <div class="lab"><span>app/Enums/Status.php</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="k">use</span> Gabrielesbaiz\NovaFieldIndicator\Contracts\{<span class="f">HasColor</span>, <span class="f">HasIcon</span>, <span class="f">HasLabel</span>};
+<span class="k">use</span> Gabrielesbaiz\NovaFieldIndicator\Enums\<span class="f">Color</span>;
+
+<span class="k">enum</span> <span class="f">Status</span>: <span class="k">string</span> <span class="k">implements</span> HasColor, HasIcon, HasLabel
+{
+    <span class="k">case</span> Active = <span class="s">'active'</span>;
+    <span class="k">case</span> Banned = <span class="s">'banned'</span>;
+
+    <span class="k">public function</span> <span class="f">indicatorLabel</span>(): ?<span class="k">string</span>
+    {
+        <span class="k">return match</span> ($<span class="k">this</span>) {
+            <span class="k">self</span>::Active =&gt; <span class="s">'Active'</span>,
+            <span class="k">self</span>::Banned =&gt; <span class="s">'Banned'</span>,
+        };
+    }
+
+    <span class="k">public function</span> <span class="f">indicatorColor</span>(): Color|<span class="k">string</span>|<span class="k">array</span>|<span class="k">null</span>
+    {
+        <span class="k">return match</span> ($<span class="k">this</span>) {
+            <span class="k">self</span>::Active =&gt; <span class="f">Color</span>::Success,
+            <span class="k">self</span>::Banned =&gt; <span class="s">'danger'</span>,
+        };
+    }
+
+    <span class="k">public function</span> <span class="f">indicatorIcon</span>(): ?<span class="k">string</span>
+    {
+        <span class="k">return match</span> ($<span class="k">this</span>) {
+            <span class="k">self</span>::Active =&gt; <span class="s">'check-circle'</span>,
+            <span class="k">self</span>::Banned =&gt; <span class="s">'x-circle'</span>,
+        };
+    }
+}</pre>
+      </div>
+      <p>
+        The methods are named <code>indicator*</code> rather than
+        <code>getLabel()</code> so an enum can implement Filament&rsquo;s contracts
+        and these side by side without a clash.
+      </p>
+      <div class="note">
+        <b>You may not need <code>->enum()</code> at all.</b> If the attribute is
+        cast to this enum, the field detects it from the value and derives the
+        table itself &mdash; <code>NovaFieldIndicator::make('Status')</code> is
+        enough. The derived table is memoised per enum class, so fifty rows cost
+        one pass over <code>cases()</code>.
+      </div>
+      <p>
+        An enum implementing none of the contracts still works: case names are
+        humanised, so <code>InReview</code> becomes &ldquo;In review&rdquo;.
+      </p>
+    </section>
+
+    <section id="guide-shapes">
+      <h2>Shapes and sizes</h2>
+      <div class="code">
+        <div class="lab"><span>Appearance</span><button class="copybtn" type="button">Copy</button></div>
+<pre>-&gt;<span class="f">dot</span>()  -&gt;<span class="f">ring</span>()  -&gt;<span class="f">square</span>()  -&gt;<span class="f">pill</span>()
+-&gt;<span class="f">shape</span>(<span class="f">Shape</span>::Ring)        <span class="c">// or the enum</span>
+-&gt;<span class="f">size</span>(<span class="s">'sm'</span>)                <span class="c">// sm | md | lg</span>
+-&gt;<span class="f">withoutLabel</span>()            <span class="c">// the mark only, no text</span>
+-&gt;<span class="f">pulse</span>()</pre>
+      </div>
+      <p>
+        Measurements live in the stylesheet, so the payload carries a token rather
+        than pixels and a new size never changes the wire format.
+      </p>
+    </section>
+
+    <section id="guide-ranges">
+      <h2>Continuous values</h2>
+      <p>
+        A state table cannot enumerate a percentage. <code>ranges()</code> takes
+        inclusive lower bounds and sorts them itself, so declaration order does
+        not matter.
+      </p>
+      <div class="code">
+        <div class="lab"><span>Health score</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Health'</span>)-&gt;<span class="f">ranges</span>([
+    <span class="s">0</span>  =&gt; <span class="s">'danger'</span>,
+    <span class="s">50</span> =&gt; <span class="s">'warning'</span>,
+    <span class="s">80</span> =&gt; <span class="s">'success'</span>,
+]),
+
+<span class="c">// or with labels per band</span>
+-&gt;<span class="f">ranges</span>([
+    <span class="s">0</span>  =&gt; [<span class="s">'label'</span> =&gt; <span class="s">'Critical'</span>, <span class="s">'color'</span> =&gt; <span class="s">'danger'</span>],
+    <span class="s">50</span> =&gt; [<span class="s">'label'</span> =&gt; <span class="s">'Healthy'</span>,  <span class="s">'color'</span> =&gt; <span class="s">'success'</span>],
+])</pre>
+      </div>
+      <p>A non-numeric value skips the table entirely and falls back to the default colour.</p>
+    </section>
+
+    <section id="guide-hiding">
+      <h2>Hiding values</h2>
+      <div class="code">
+        <div class="lab"><span>Visibility</span><button class="copybtn" type="button">Copy</button></div>
+<pre>-&gt;<span class="f">hideWhen</span>(<span class="s">'active'</span>)                    <span class="c">// one value</span>
+-&gt;<span class="f">hideWhen</span>([<span class="s">'invited'</span>, <span class="s">'requested'</span>])     <span class="c">// several</span>
+-&gt;<span class="f">hideWhen</span>(<span class="k">fn</span> ($value) =&gt; $value === <span class="s">'inactive'</span>)
+-&gt;<span class="f">hideWhenEmpty</span>()                       <span class="c">// null, false, 0, '' and '0'</span></pre>
+      </div>
+      <p>
+        A hidden field short-circuits: nothing is resolved for it at all, so the
+        cost is not paid per row.
+      </p>
+      <div class="note">
+        <b>One behaviour change worth knowing.</b> In 2.x a string argument was
+        tested with <code>is_callable()</code> first, so
+        <code>shouldHide('trim')</code> silently <em>invoked</em> <code>trim()</code>
+        as the predicate. <code>hideWhen()</code> dispatches on the declared type,
+        so a string is always a value. Pass a closure if you wanted a callback.
+      </div>
+    </section>
+
+    <section id="guide-filter">
+      <h2>Filtering</h2>
+      <p>
+        Call <code>filterable()</code> and the field builds its own select-filter
+        options from the state table, or from the enum when there is one.
+      </p>
+      <div class="code">
+        <div class="lab"><span>Filterable</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">enum</span>(<span class="f">Status</span>::<span class="k">class</span>)-&gt;<span class="f">filterable</span>(),</pre>
+      </div>
+      <p>
+        If there is nothing to offer &mdash; a field configured only with
+        <code>colorUsing()</code>, say &mdash; no filter is registered, rather than
+        an empty dropdown.
+      </p>
+    </section>
+
+    <section id="guide-a11y">
+      <h2>Accessibility</h2>
+      <p>
+        WCAG 1.4.1 says colour must not be the only visual means of conveying
+        information. About one man in twelve has some form of colour vision
+        deficiency, and a greyscale print has none at all. This package gives you
+        three channels and uses the first by default:
+      </p>
+      <ol>
+        <li><b>A visible label</b> &mdash; on by default. The text is the meaning; the mark reinforces it.</li>
+        <li><b>A distinct icon</b> per state, via <code>withIcons()</code>.</li>
+        <li><b>A distinct shape</b> per state &mdash; a ring for pending, a square for queued.</li>
+      </ol>
+      <p>
+        For screen readers the field switches behaviour based on whether text is
+        visible, because the two cases need opposite treatment:
+      </p>
+      <table>
+        <tr><th>Case</th><th>Markup</th><th>Why</th></tr>
+        <tr><td>Label visible</td><td>mark is <code>aria-hidden</code></td>
+            <td>The text is already the accessible name. An <code>aria-label</code> here would override the visible text and break voice control.</td></tr>
+        <tr><td><code>withoutLabel()</code></td><td><code>role="img"</code> + <code>aria-label</code></td>
+            <td>Colour alone carries the meaning, so the mark becomes a named graphic. The label is never empty.</td></tr>
+      </table>
+      <p>
+        Icons are always <code>aria-hidden</code>; they are a redundant channel for
+        sighted users, never the name. The pulse animation is wrapped in
+        <code>prefers-reduced-motion</code>, and forced-colors mode keeps the mark
+        visible with a <code>CanvasText</code> border.
+      </p>
+    </section>
+
+    <div class="pager">
+      <a href="#/install"><span>Previous</span><b>Installation</b></a>
+      <a class="next" href="#/colors"><span>Next</span><b>Colours</b></a>
+    </div>
+  </div>
+  <aside class="onthispage" aria-label="On this page"><h4>On this page</h4><ol data-toc></ol></aside>
+ </div>
+</section>
+
+<!-- ══ COLOURS ═══════════════════════════════════════════════════════ -->
+<section class="page hidden" id="colors">
+ <div class="mx docs">
+  <aside class="sidenav" data-nav aria-label="Documentation"></aside>
+  <div class="body">
+    <h1>Colours</h1>
+    <p class="lede">How a colour is named, how it is resolved, and why it survives a theme change.</p>
+
+    <section id="colors-how">
+      <h2>Nova&rsquo;s palette, not ours</h2>
+      <p>
+        Nova emits every Tailwind colour at <code>:root</code> as
+        <code>--colors-&lt;family&gt;-&lt;shade&gt;</code>, holding the channels only
+        &mdash; <code>34, 197, 94</code> rather than a finished colour. A token
+        resolves to a family and two shades, and is used as
+        <code>rgba(var(--colors-green-500))</code>.
+      </p>
+      <p>
+        That indirection is the whole point: an application that re-themes Nova
+        re-themes every indicator, with no CSS of its own. Version 2 hard-coded
+        fifteen Tailwind&nbsp;v1 hex values, which could not follow a theme and
+        could not express a dark variant.
+      </p>
+      <div class="note">
+        <b>Dark mode is a shade change, not a colour change.</b> Nova&rsquo;s
+        palette variables are not semantic &mdash; <code>--colors-green-500</code>
+        is the same value in both themes. So the field resolves <em>two</em>
+        values and the stylesheet picks one, generally one step lighter in dark
+        mode, because a 500 mark on a slate-800 surface reads dimmer than on white.
+      </div>
+    </section>
+
+    <section id="colors-tokens">
+      <h2>The built-in tokens</h2>
+      <p>
+        Nine names, resolved for you. The first four are the ones that rendered
+        invisibly in 2.x.
+      </p>
+      <div id="tokenwall" class="rows" style="margin-top:1.1rem"></div>
+    </section>
+
+    <section id="colors-ways">
+      <h2>Every accepted form</h2>
+      <p>Resolution is ordered. The first rule that matches wins.</p>
+      <table>
+        <tr><th>#</th><th>Form</th><th>Example</th><th>Notes</th></tr>
+        <tr><td>1</td><td><code>Color</code> case</td><td><code>Color::Success</code></td><td>The typed form.</td></tr>
+        <tr><td>2</td><td>Application token</td><td><code>'brand'</code></td><td>From config. Checked first, so it can shadow anything below.</td></tr>
+        <tr><td>3</td><td>Built-in token</td><td><code>'success'</code></td><td>The nine names above.</td></tr>
+        <tr><td>4</td><td>Family and shade</td><td><code>'emerald-600'</code></td><td>Any Nova family, shades 50&ndash;950.</td></tr>
+        <tr><td>5</td><td>Bare family</td><td><code>'emerald'</code></td><td>Uses the configured default shades.</td></tr>
+        <tr><td>6</td><td>Explicit pair</td><td><code>['light' =&gt; …, 'dark' =&gt; …]</code></td><td>Each side resolved on its own.</td></tr>
+        <tr><td>7</td><td>Literal CSS</td><td><code>'#7c3aed'</code></td><td>Allow-listed. Same in both themes unless paired.</td></tr>
+        <tr><td>8</td><td>Anything else</td><td>&mdash;</td><td>Throws at field-definition time.</td></tr>
+      </table>
+      <div class="note">
+        <b>An unknown <em>value</em> never throws.</b> A row whose status is
+        missing from the state table is data, not a bug: it falls back to the
+        default colour and <code>unknown()</code> label. Only an unknown
+        <em>token spelling</em> throws, because that is a typo in your resource
+        and you want to hear about it immediately. Nova&rsquo;s own
+        <code>Badge</code> throws for both.
+      </div>
+    </section>
+
+    <section id="colors-literals">
+      <h2>Literals are allow-listed</h2>
+      <p>
+        A resolved colour becomes an inline custom property, so a literal that
+        could close a declaration would be a CSS injection. Validation happens
+        once, server-side, against an anchored pattern.
+      </p>
+      <table>
+        <tr><th>Accepted</th><th>Rejected</th></tr>
+        <tr>
+          <td><code>#fff</code>, <code>#ffff</code>, <code>#22c55e</code>, <code>#aabbccdd</code></td>
+          <td><code>#12345</code> &mdash; not a valid CSS hex length</td>
+        </tr>
+        <tr>
+          <td><code>rgb()</code>, <code>rgba()</code>, <code>hsl()</code>, <code>hsla()</code></td>
+          <td>anything containing <code>;</code> <code>{</code> <code>}</code></td>
+        </tr>
+        <tr>
+          <td><code>oklch()</code>, <code>lab()</code>, <code>lch()</code>, <code>color-mix()</code></td>
+          <td><code>url(</code> &mdash; the exfiltration vector</td>
+        </tr>
+        <tr>
+          <td><code>var(--brand)</code>, <code>var(--brand, #fff)</code></td>
+          <td><code>expression(</code>, <code>image-set(</code>, comments, backslashes</td>
+        </tr>
+      </table>
+      <p>
+        Capped at 64 characters. The Vue component does no pattern matching at
+        all &mdash; it binds a style <em>object</em>, which the browser parses and
+        discards if unparseable.
+      </p>
+    </section>
+
+    <section id="colors-rebrand">
+      <h2>Rebranding a token</h2>
+      <p>
+        Application tokens are resolved before the built-ins, so you can redefine
+        <code>success</code> itself once rather than at forty call sites.
+      </p>
+      <div class="code">
+        <div class="lab"><span>config/nova-field-indicator.php</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="s">'colors'</span> =&gt; [
+    <span class="s">'tokens'</span> =&gt; [
+        <span class="s">'brand'</span>   =&gt; [<span class="s">'light'</span> =&gt; <span class="s">'violet-600'</span>, <span class="s">'dark'</span> =&gt; <span class="s">'violet-400'</span>],
+        <span class="s">'success'</span> =&gt; <span class="s">'emerald-600'</span>,   <span class="c">// override a built-in</span>
+        <span class="s">'green'</span>   =&gt; <span class="s">'#38C172'</span>,      <span class="c">// pin a 2.x colour exactly</span>
+    ],
+],</pre>
+      </div>
+    </section>
+
+    <section id="colors-wall">
+      <h2>The palette wall</h2>
+      <p>
+        Every family Nova emits, at every shade, with the name to pass to
+        <code>colors()</code>. Click any swatch to copy the call.
+      </p>
+      <p style="font-size:.85rem;color:var(--muted)">
+        The swatches here are approximations of the Tailwind ramp, drawn by this
+        page. The exact values come from whatever your Nova build defines for
+        <code>--colors-*</code> &mdash; which is the entire point of resolving
+        against them. The <em>names</em> are exact.
+      </p>
+      <div id="wall" style="margin-top:1.1rem"></div>
+      <p id="wallnote" style="font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted)">
+        Click a swatch to copy its PHP.
+      </p>
+    </section>
+
+    <div class="pager">
+      <a href="#/guide"><span>Previous</span><b>Guide</b></a>
+      <a class="next" href="#/configuration"><span>Next</span><b>Configuration</b></a>
+    </div>
+  </div>
+  <aside class="onthispage" aria-label="On this page"><h4>On this page</h4><ol data-toc></ol></aside>
+ </div>
+</section>
+
+<!-- ══ CONFIGURATION ═════════════════════════════════════════════════ -->
+<section class="page hidden" id="configuration">
+ <div class="mx docs">
+  <aside class="sidenav" data-nav aria-label="Documentation"></aside>
+  <div class="body">
+    <h1>Configuration</h1>
+    <p class="lede">Application-wide defaults. Every key can be overridden per field.</p>
+
+    <section id="config-publish">
+      <h2>Publishing</h2>
+      <div class="code">
+        <div class="lab"><span>Terminal</span><button class="copybtn" type="button">Copy</button></div>
+<pre>php artisan vendor:publish --tag=nova-field-indicator-config</pre>
+      </div>
+    </section>
+
+    <section id="config-keys">
+      <h2>The keys</h2>
+      <table>
+        <tr><th>Key</th><th>Default</th><th>Effect</th></tr>
+        <tr><td><code>appearance.shape</code></td><td><code>'dot'</code></td><td><code>dot</code>, <code>ring</code>, <code>pill</code> or <code>square</code>.</td></tr>
+        <tr><td><code>appearance.size</code></td><td><code>'md'</code></td><td><code>sm</code>, <code>md</code> or <code>lg</code>.</td></tr>
+        <tr><td><code>appearance.inline</code></td><td><code>true</code></td><td>Writes Nova&rsquo;s own <code>$inline</code> property.</td></tr>
+        <tr><td><code>labels.empty</code></td><td><code>'—'</code></td><td>Shown when a field resolves to no indicator.</td></tr>
+        <tr><td><code>labels.translate</code></td><td><code>true</code></td><td>Pass labels through <code>__()</code>.</td></tr>
+        <tr><td><code>colors.default</code></td><td><code>'gray'</code></td><td>Colour for a value with no state.</td></tr>
+        <tr><td><code>colors.shades</code></td><td><code>['light' =&gt; 500, 'dark' =&gt; 400]</code></td><td>Shades chosen for a bare family name.</td></tr>
+        <tr><td><code>colors.soft_alpha</code></td><td><code>15</code></td><td>Tint percentage behind a pill.</td></tr>
+        <tr><td><code>colors.tokens</code></td><td><code>[]</code></td><td>Application colour names. See <a href="#/colors">Colours</a>.</td></tr>
+        <tr><td><code>icons.enabled</code></td><td><code>false</code></td><td>Global <code>withIcons()</code> default.</td></tr>
+        <tr><td><code>icons.type</code></td><td><code>'solid'</code></td><td><code>solid</code>, <code>outline</code>, <code>mini</code> or <code>micro</code>.</td></tr>
+        <tr><td><code>icons.defaults</code></td><td>four entries</td><td>Icon per resolved token, so a bare <code>withIcons()</code> is already useful.</td></tr>
+      </table>
+    </section>
+
+    <section id="config-not">
+      <h2>What is deliberately not configurable</h2>
+      <ul>
+        <li><b>The family and shade table.</b> It is Nova&rsquo;s, not ours &mdash; mirroring it in config would let the two drift.</li>
+        <li><b>The CSS literal allow-list.</b> It is a security boundary. See <a href="#/security">Security</a>.</li>
+        <li><b>Component and asset handles.</b> Renaming them would break published overrides for no benefit.</li>
+      </ul>
+    </section>
+
+    <section id="config-lang">
+      <h2>Translations</h2>
+      <p>
+        The package ships <code>en</code> and <code>it</code>. Keys are
+        <code>Unknown</code>, <code>Not set</code>, <code>Yes</code> and
+        <code>No</code> &mdash; the labels <code>boolean()</code> and
+        <code>unknown()</code> produce in PHP.
+      </p>
+      <p>
+        The service provider registers them with <em>both</em> Nova&rsquo;s
+        JavaScript translator and Laravel&rsquo;s PHP translator, because this
+        package resolves labels server-side. Registering only the first &mdash;
+        which is the more common pattern &mdash; would leave those keys
+        untranslated.
+      </p>
+    </section>
+
+    <div class="pager">
+      <a href="#/colors"><span>Previous</span><b>Colours</b></a>
+      <a class="next" href="#/api"><span>Next</span><b>API reference</b></a>
+    </div>
+  </div>
+  <aside class="onthispage" aria-label="On this page"><h4>On this page</h4><ol data-toc></ol></aside>
+ </div>
+</section>
+
+<!-- ══ API ═══════════════════════════════════════════════════════════ -->
+<section class="page hidden" id="api">
+ <div class="mx docs">
+  <aside class="sidenav" data-nav aria-label="Documentation"></aside>
+  <div class="body">
+    <h1>API reference</h1>
+    <p class="lede">Every public method on <code>NovaFieldIndicator</code>.</p>
+
+    <section id="api-content">
+      <h2>Content</h2>
+      <table>
+        <tr><th>Method</th><th>Does</th></tr>
+        <tr><td><code>states(array)</code></td><td>Label, colour, icon, tooltip and pulse for each value, in one call.</td></tr>
+        <tr><td><code>labels(array)</code></td><td>Label per value. Accepts <code>Stringable</code>.</td></tr>
+        <tr><td><code>colors(array)</code></td><td>Colour per value. See <a href="#/colors">Colours</a> for accepted forms.</td></tr>
+        <tr><td><code>icons(array)</code></td><td>Heroicon per value. Implies <code>withIcons()</code>.</td></tr>
+        <tr><td><code>descriptions(array)</code></td><td>Tooltip per value.</td></tr>
+        <tr><td><code>enum(string)</code></td><td>Derive the table from a backed enum.</td></tr>
+        <tr><td><code>boolean(?string, ?string)</code></td><td>Ready-made true/false table. Defaults to <code>Yes</code>/<code>No</code>.</td></tr>
+        <tr><td><code>ranges(array)</code></td><td>Inclusive numeric lower bounds.</td></tr>
+        <tr><td><code>unknown(string, $color = null)</code></td><td>Label &mdash; and optionally colour &mdash; for an unmapped value.</td></tr>
+        <tr><td><code>defaultColor($color)</code></td><td>Colour for a value with no state.</td></tr>
+        <tr><td><code>withoutTranslation(bool)</code></td><td>Stop passing labels through <code>__()</code>.</td></tr>
+      </table>
+    </section>
+
+    <section id="api-closures">
+      <h2>Closure resolvers</h2>
+      <p>Each receives <code>(mixed $value, mixed $resource)</code> and wins over the state table.</p>
+      <table>
+        <tr><th>Method</th><th>Returns</th></tr>
+        <tr><td><code>labelUsing(Closure)</code></td><td><code>?string</code>. Not translated &mdash; the closure owns its wording.</td></tr>
+        <tr><td><code>colorUsing(Closure)</code></td><td>Any accepted colour form.</td></tr>
+        <tr><td><code>iconUsing(Closure)</code></td><td><code>?string</code>. Implies <code>withIcons()</code>.</td></tr>
+        <tr><td><code>tooltipUsing(Closure)</code></td><td><code>?string</code>.</td></tr>
+      </table>
+    </section>
+
+    <section id="api-appearance">
+      <h2>Appearance</h2>
+      <table>
+        <tr><th>Method</th><th>Does</th></tr>
+        <tr><td><code>shape(Shape|string)</code></td><td>Also <code>dot()</code>, <code>ring()</code>, <code>pill()</code>, <code>square()</code>.</td></tr>
+        <tr><td><code>size(Size|string)</code></td><td><code>sm</code>, <code>md</code>, <code>lg</code>.</td></tr>
+        <tr><td><code>withoutLabel(bool)</code></td><td>Mark only. The aria-label becomes the accessible name.</td></tr>
+        <tr><td><code>withIcons(bool)</code></td><td>Turn icons on with no map, using the per-token defaults.</td></tr>
+        <tr><td><code>iconType(IconType|string)</code></td><td><code>solid</code>, <code>outline</code>, <code>mini</code>, <code>micro</code>.</td></tr>
+        <tr><td><code>pulse(bool|Closure|array)</code></td><td>Animate the mark. Respects reduced motion.</td></tr>
+        <tr><td><code>inline(bool)</code></td><td>Writes Nova&rsquo;s own <code>$inline</code> property.</td></tr>
+      </table>
+    </section>
+
+    <section id="api-visibility">
+      <h2>Visibility and filtering</h2>
+      <table>
+        <tr><th>Method</th><th>Does</th></tr>
+        <tr><td><code>hideWhen($value)</code></td><td><code>Closure</code>, array, scalar or <code>BackedEnum</code>. A string is always data.</td></tr>
+        <tr><td><code>hideWhenEmpty(bool)</code></td><td>Hide <code>null</code>, <code>false</code>, <code>0</code>, <code>''</code> and <code>'0'</code>.</td></tr>
+        <tr><td><code>filterable()</code></td><td>Register a select filter built from the states or the enum.</td></tr>
+      </table>
+      <p>
+        Nova&rsquo;s own field methods all apply as usual &mdash;
+        <code>sortable()</code>, <code>onlyOnDetail()</code>, <code>readonly()</code>
+        and the rest. The field is <code>Unfillable</code> and calls
+        <code>exceptOnForms()</code>, so it never appears on a form.
+      </p>
+    </section>
+
+    <section id="api-enums">
+      <h2>Enums and contracts</h2>
+      <table>
+        <tr><th>Type</th><th>Cases / methods</th></tr>
+        <tr><td><code>Enums\Color</code></td><td><code>Primary</code>, <code>Success</code>, <code>Danger</code>, <code>Warning</code>, <code>Info</code>, <code>Gray</code>, <code>Grey</code>, <code>Black</code>, <code>White</code></td></tr>
+        <tr><td><code>Enums\Shape</code></td><td><code>Dot</code>, <code>Ring</code>, <code>Pill</code>, <code>Square</code></td></tr>
+        <tr><td><code>Enums\Size</code></td><td><code>Small</code>, <code>Medium</code>, <code>Large</code></td></tr>
+        <tr><td><code>Enums\IconType</code></td><td><code>Solid</code>, <code>Outline</code>, <code>Mini</code>, <code>Micro</code></td></tr>
+        <tr><td><code>Contracts\HasLabel</code></td><td><code>indicatorLabel(): ?string</code></td></tr>
+        <tr><td><code>Contracts\HasColor</code></td><td><code>indicatorColor(): Color|string|array|null</code></td></tr>
+        <tr><td><code>Contracts\HasIcon</code></td><td><code>indicatorIcon(): ?string</code></td></tr>
+      </table>
+      <p>
+        Plain palette families are deliberately <em>not</em> enum cases. They
+        resolve as families instead, which is what lets the configured default
+        shades apply to them.
+      </p>
+    </section>
+
+    <section id="api-extend">
+      <h2>Extending</h2>
+      <p>
+        <code>NovaFieldIndicator</code> is not <code>final</code>: subclassing is
+        the documented extension point. Override
+        <code>resolveIndicatorFor(string|int|null $key, mixed $resource)</code>
+        &mdash; it is the single seam the rest of the field depends on.
+      </p>
+      <p>
+        Resolution itself is framework-free. Nothing under <code>Support</code>,
+        <code>Results</code>, <code>Enums</code> or <code>Contracts</code>
+        references Nova, which is enforced by an architecture test and is why the
+        colour and enum logic can be unit-tested without booting an application.
+      </p>
+    </section>
+
+    <div class="pager">
+      <a href="#/configuration"><span>Previous</span><b>Configuration</b></a>
+      <a class="next" href="#/security"><span>Next</span><b>Security</b></a>
+    </div>
+  </div>
+  <aside class="onthispage" aria-label="On this page"><h4>On this page</h4><ol data-toc></ol></aside>
+ </div>
+</section>
+
+<!-- ══ SECURITY ══════════════════════════════════════════════════════ -->
+<section class="page hidden" id="security">
+ <div class="mx docs">
+  <aside class="sidenav" data-nav aria-label="Documentation"></aside>
+  <div class="body">
+    <h1>Security</h1>
+    <p class="lede">What the trust boundary actually is, and what it deliberately is not.</p>
+
+    <section id="sec-report">
+      <h2>Reporting</h2>
+      <p>
+        Please report security issues to
+        <a href="mailto:gabriele@sbaiz.com">gabriele@sbaiz.com</a> rather than
+        opening a public issue.
+      </p>
+      <table>
+        <tr><th>Version</th><th>Supported</th></tr>
+        <tr><td>3.x</td><td>Yes</td></tr>
+        <tr><td>2.x</td><td>No</td></tr>
+        <tr><td>1.x</td><td>No</td></tr>
+      </table>
+    </section>
+
+    <section id="sec-model">
+      <h2>Threat model</h2>
+      <p>
+        This field renders a colour-coded mark. It never renders HTML, never uses
+        <code>v-html</code>, and never echoes an attribute value as markup &mdash;
+        so the usual stored-XSS surface of a Nova field does not apply.
+      </p>
+      <p>The one boundary that does exist is <b>CSS</b>, because a configured colour becomes an inline custom property.</p>
+      <ul>
+        <li>Colour values are validated <b>server-side</b> against an anchored allow-list before they are serialized.</li>
+        <li>Anything containing <code>;</code> <code>{</code> <code>}</code> <code>/*</code> <code>\</code> <code>&lt;</code> <code>&gt;</code> <code>url(</code> <code>expression(</code> <code>image-set(</code> or <code>javascript:</code> is rejected with an exception.</li>
+        <li>The Vue component does <b>no</b> pattern matching on colours. It binds a style object, which Vue applies through <code>setProperty()</code>, so an unparseable value is dropped by the browser rather than concatenated into a declaration.</li>
+      </ul>
+      <div class="note">
+        <b>This changed in 3.0.</b> Version 2 classified colours in the browser
+        with an unanchored regex and interpolated the result into a
+        <code>background:${color};</code> string. That would have accepted
+        <code>#fff; background-image:url(//example.com)</code>. Colour
+        configuration normally comes from your own resource files rather than user
+        input, so this is defence in depth rather than a live exploit path &mdash;
+        it is enforced anyway, and the payloads are covered in
+        <code>tests/ColorResolverTest.php</code>.
+      </div>
+    </section>
+
+    <section id="sec-creds">
+      <h2>Nova credentials</h2>
+      <p>
+        <code>auth.json</code> holds your Nova licence credentials. It is listed
+        in <code>.gitignore</code> and marked <code>export-ignore</code> in
+        <code>.gitattributes</code>, so it is neither committed nor shipped in a
+        distributed tarball. If you fork the package, verify both before pushing.
+      </p>
+    </section>
+
+    <div class="pager">
+      <a href="#/api"><span>Previous</span><b>API reference</b></a>
+      <a class="next" href="#/upgrade"><span>Next</span><b>Upgrading</b></a>
+    </div>
+  </div>
+  <aside class="onthispage" aria-label="On this page"><h4>On this page</h4><ol data-toc></ol></aside>
+ </div>
+</section>
+
+<!-- ══ UPGRADE ═══════════════════════════════════════════════════════ -->
+<section class="page hidden" id="upgrade">
+ <div class="mx docs">
+  <aside class="sidenav" data-nav aria-label="Documentation"></aside>
+  <div class="body">
+    <h1>Upgrading from 2.x</h1>
+    <p class="lede">A clean break, with a command that does most of it for you.</p>
+
+    <section id="up-start">
+      <h2>Start here</h2>
+      <div class="code">
+        <div class="lab"><span>Terminal</span><button class="copybtn" type="button">Copy</button></div>
+<pre>composer require gabrielesbaiz/nova-field-indicator:^3.0
+php artisan nova-field-indicator:upgrade --dry-run</pre>
+      </div>
+      <p>
+        Review the output, then run it without the flag. It is idempotent, so
+        running it twice is safe &mdash; but commit first, because it rewrites
+        files in place.
+      </p>
+      <p>
+        It rewrites what is mechanical and <b>reports</b> what needs a human. Read
+        that report: the first entry in it is the one that can bite silently.
+      </p>
+    </section>
+
+    <section id="up-invisible">
+      <h2>1. Four colours were invisible and now appear</h2>
+      <p>
+        This is the reason 3.0 exists, and it is a fix that reads as a change.
+      </p>
+      <p>
+        In 2.x, <code>success</code>, <code>danger</code>, <code>warning</code> and
+        <code>info</code> were styled as <code>var(--success)</code> and friends.
+        Those CSS variables existed in Nova 3 and 4. <b>Nova 5 does not define
+        them</b>, so the mark painted with an invalid colour and rendered
+        completely transparent.
+      </p>
+      <div class="pair" style="margin-top:1.4rem">
+        <div class="out">
+          <p class="lab">2.x on Nova 5</p>
+          <div class="rows">
+            <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:var(--success);--nfi-color-dark:var(--success)"><span class="nfi-mark"></span><span>Active</span></span>
+            <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:var(--danger);--nfi-color-dark:var(--danger)"><span class="nfi-mark"></span><span>Banned</span></span>
+          </div>
+          <p style="font-size:.82rem;color:var(--muted);margin:.9rem 0 0">The marks above are genuinely there &mdash; and genuinely invisible.</p>
+        </div>
+        <div class="out">
+          <p class="lab">3.0</p>
+          <div class="rows">
+            <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-green-500));--nfi-color-dark:rgba(var(--colors-green-400))"><span class="nfi-mark"></span><span>Active</span></span>
+            <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-red-500));--nfi-color-dark:rgba(var(--colors-red-400))"><span class="nfi-mark"></span><span>Banned</span></span>
+          </div>
+          <p style="font-size:.82rem;color:var(--muted);margin:.9rem 0 0">No opt-out, and there should not be one.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="up-hues">
+      <h2>2. Every named colour shifts hue</h2>
+      <p>2.x hard-coded the <b>Tailwind v1</b> palette. 3.0 resolves to Nova&rsquo;s, which is Tailwind 3.</p>
+      <table>
+        <tr><th>Name</th><th>2.x</th><th>3.0</th><th>Change</th></tr>
+        <tr><td><code>grey</code> / <code>gray</code></td><td><code>#B8C2CC</code></td><td><code>gray-400</code></td><td>cooler, darker</td></tr>
+        <tr><td><code>black</code></td><td><code>#22292F</code></td><td><code>gray-900</code></td><td>darker</td></tr>
+        <tr><td><code>red</code></td><td><code>#E3342F</code></td><td><code>red-500</code></td><td>lighter, less orange</td></tr>
+        <tr><td><code>orange</code></td><td><code>#F6993F</code></td><td><code>orange-500</code></td><td>more saturated</td></tr>
+        <tr><td><code>yellow</code></td><td><code>#FFED4A</code></td><td><code>yellow-500</code></td><td><b>noticeably darker</b></td></tr>
+        <tr><td><code>green</code></td><td><code>#38C172</code></td><td><code>green-500</code></td><td>similar</td></tr>
+        <tr><td><code>teal</code></td><td><code>#4DC0B5</code></td><td><code>teal-500</code></td><td>more saturated</td></tr>
+        <tr><td><code>blue</code></td><td><code>#3490DC</code></td><td><code>blue-500</code></td><td>more violet</td></tr>
+        <tr><td><code>indigo</code></td><td><code>#6574CD</code></td><td><code>indigo-500</code></td><td>similar</td></tr>
+        <tr><td><code>purple</code></td><td><code>#9561E2</code></td><td><code>purple-500</code></td><td>similar</td></tr>
+        <tr><td><code>pink</code></td><td><code>#F66D9B</code></td><td><code>pink-500</code></td><td>more saturated</td></tr>
+      </table>
+      <p>
+        The upgrade command rewrites any of these hexes it finds in a
+        <code>colors()</code> call. To keep an exact old value, pass a literal, or
+        pin the token once in the published config.
+      </p>
+    </section>
+
+    <section id="up-css">
+      <h2>3. Custom <code>.indicator-*</code> CSS stops applying</h2>
+      <p>
+        2.x invited this, because colours were class names &mdash;
+        <code>.indicator-brand { background: #123456 }</code> in your stylesheet,
+        then <code>->colors(['active' =&gt; 'brand'])</code>.
+      </p>
+      <p>
+        3.0 emits no <code>indicator-*</code> class at all, so those rules are dead
+        and the value falls back to neutral grey. This is the sharpest real break
+        in the release, and it is deliberate: keeping a legacy hook class would
+        re-create exactly the stylesheet-source-order fragility being removed.
+      </p>
+      <div class="code">
+        <div class="lab"><span>Migrate in one line</span><button class="copybtn" type="button">Copy</button></div>
+<pre>-&gt;<span class="f">colors</span>([<span class="s">'active'</span> =&gt; <span class="s">'#123456'</span>]),</pre>
+      </div>
+    </section>
+
+    <section id="up-renames">
+      <h2>4. Renamed and removed methods</h2>
+      <table>
+        <tr><th>2.x</th><th>3.0</th></tr>
+        <tr><td><code>shouldHide($x)</code></td><td><code>hideWhen($x)</code></td></tr>
+        <tr><td><code>shouldHideIfNo()</code></td><td><code>hideWhenEmpty()</code></td></tr>
+        <tr><td><code>withoutLabels()</code></td><td><b>removed</b> &mdash; see below</td></tr>
+        <tr><td><code>public $hideCallback</code></td><td>internal</td></tr>
+        <tr><td><code>$showOnCreation</code> / <code>$showOnUpdate</code></td><td>implicit</td></tr>
+      </table>
+      <p>
+        There are no deprecation shims. A missed call site raises
+        <code>BadMethodCallException</code>, which is a better failure than a
+        silently wrong one.
+      </p>
+    </section>
+
+    <section id="up-labels">
+      <h2>5. <code>withoutLabels()</code> is gone &mdash; read this one carefully</h2>
+      <p>
+        The names are one character apart and the meanings are nearly opposite, so
+        it is worth being explicit.
+      </p>
+      <p>
+        <b>2.x <code>withoutLabels()</code></b> meant &ldquo;print the raw value
+        instead of a mapped label&rdquo;. In 3.0 that is simply the default: an
+        unmapped value falls back to itself. In almost every case you just delete
+        the call, and the command does that for you when the chain has no
+        <code>labels()</code>.
+      </p>
+      <p>
+        <b>3.0 <code>withoutLabel()</code></b>, singular, is a different feature:
+        render the mark with <b>no text at all</b>. Reach for it only if that is
+        genuinely what you want.
+      </p>
+      <p>
+        If you had both <code>withoutLabels()</code> and <code>labels()</code> on
+        one chain, the command refuses to guess and flags it &mdash; that
+        combination was contradictory in 2.x, since the labels were ignored.
+      </p>
+    </section>
+
+    <section id="up-strict">
+      <h2>6. A string is no longer a possible callback</h2>
+      <div class="code">
+        <div class="lab"><span>The one silent change</span></div>
+<pre><span class="c">// 2.x: is_callable('trim') was true, so trim() was INVOKED as the predicate.</span>
+<span class="c">// 3.0: 'trim' is a value, compared against the attribute.</span>
+-&gt;<span class="f">hideWhen</span>(<span class="s">'trim'</span>)
+
+<span class="c">// If you wanted the callback:</span>
+-&gt;<span class="f">hideWhen</span>(<span class="k">fn</span> ($value) =&gt; <span class="f">trim</span>($value) === <span class="s">''</span>)</pre>
+      </div>
+      <p>
+        The command reports every <code>shouldHide()</code> whose argument names a
+        real PHP function. Scalar comparison is otherwise unchanged: both sides
+        are normalised first, so <code>0</code> still matches <code>'0'</code> the
+        way it did under 2.x&rsquo;s <code>==</code>.
+      </p>
+    </section>
+
+    <section id="up-forms">
+      <h2>7. The field is read-only on forms</h2>
+      <p>
+        It implements <code>Unfillable</code> and calls <code>exceptOnForms()</code>,
+        so it is hidden on create, update, attach and update-attached &mdash; the
+        last two of which the old <code>$showOnCreation</code>/<code>$showOnUpdate</code>
+        pair missed. The 2.x form component was registered and bundled but
+        unreachable and never wrote a value, so nothing can regress.
+      </p>
+      <div class="code">
+        <div class="lab"><span>Pair it with a real input</span><button class="copybtn" type="button">Copy</button></div>
+<pre><span class="f">Select</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">options</span>($options)-&gt;<span class="f">onlyOnForms</span>(),
+<span class="f">NovaFieldIndicator</span>::<span class="f">make</span>(<span class="s">'Status'</span>)-&gt;<span class="f">enum</span>(<span class="f">Status</span>::<span class="k">class</span>),</pre>
+      </div>
+    </section>
+
+    <section id="up-payload">
+      <h2>8. The payload changed</h2>
+      <p>
+        Only relevant if you read the serialized field from the API or wrote your
+        own Vue override. <code>labels</code>, <code>colors</code>,
+        <code>unknownLabel</code>, <code>withoutLabels</code> are gone, replaced by
+        an <code>indicators</code> list. The component is renamed from
+        <code>indicator-field</code> to <code>nova-field-indicator</code>, and the
+        asset handles from <code>indicator</code> to the same.
+      </p>
+      <div class="note">
+        <b>Build output paths are unchanged</b> &mdash; <code>dist/js/field.js</code>
+        and <code>dist/css/field.css</code> &mdash; so there is no cache-busting
+        step to worry about and nothing to republish.
+      </div>
+      <p>
+        Subclasses that override <code>resolveForDisplay()</code> should override
+        <code>resolveIndicatorFor()</code> instead; resolution moved to
+        <code>jsonSerialize()</code>.
+      </p>
+    </section>
+
+    <div class="pager">
+      <a href="#/security"><span>Previous</span><b>Security</b></a>
+      <a class="next" href="#/changelog"><span>Next</span><b>Changelog</b></a>
+    </div>
+  </div>
+  <aside class="onthispage" aria-label="On this page"><h4>On this page</h4><ol data-toc></ol></aside>
+ </div>
+</section>
+
+<!-- ══ CHANGELOG ═════════════════════════════════════════════════════ -->
+<section class="page hidden" id="changelog">
+ <div class="mx docs">
+  <aside class="sidenav" data-nav aria-label="Documentation"></aside>
+  <div class="body">
+    <h1>Changelog</h1>
+    <p class="lede">Mirrors <code>CHANGELOG.md</code> in the repository.</p>
+
+    <section id="cl-req">
+      <h2>3.0.0 &mdash; requirements</h2>
+      <ul>
+        <li>Requires PHP 8.3+, Laravel 12 or 13, and Nova 5.7+ (Nova 6 is explicitly conflicted).</li>
+        <li>Dropped PHP 8.0&ndash;8.2 and Laravel 10 and 11.</li>
+        <li><code>laravel/nova</code> is now a runtime requirement rather than a dev dependency.</li>
+      </ul>
+    </section>
+
+    <section id="cl-fixed">
+      <h2>Fixed</h2>
+      <ul>
+        <li><b><code>success</code>, <code>danger</code>, <code>warning</code> and <code>info</code> rendered an invisible dot on Nova 5.</b> They were styled as <code>var(--success)</code> and friends &mdash; variables Nova 3 and 4 defined and Nova 5 does not. If you used these tokens, dots will now appear where your index looked empty.</li>
+        <li><b><code>shouldHide('trim')</code> silently invoked <code>trim()</code></b> instead of comparing against the string, because <code>is_callable()</code> was tested before the value branch.</li>
+        <li>Colour literals are now validated server-side against an anchored allow-list before they reach an inline style.</li>
+        <li><code>whitespace-no-wrap</code> was Tailwind v1 syntax and had done nothing since Nova 4.</li>
+        <li>The neutral colour no longer depends on stylesheet source order.</li>
+        <li>Dark mode is supported at all, for the first time.</li>
+        <li>The generic <code>indicator</code> asset handle, which any other package could collide with.</li>
+      </ul>
+    </section>
+
+    <section id="cl-added">
+      <h2>Added</h2>
+      <ul>
+        <li><b><code>->enum(Status::class)</code></b> derives labels, colours and icons from one enum. A value that <em>is</em> a backed enum self-describes with no configuration at all.</li>
+        <li><code>->states()</code>, shapes, three sizes, icons, <code>->ranges()</code>, <code>->boolean()</code>, the four closure resolvers, and <code>->pulse()</code>.</li>
+        <li><code>->filterable()</code>: the field implements <code>FilterableField</code> and builds its own select-filter options.</li>
+        <li>Accessibility: the mark is decorative when a label is visible and becomes a named <code>role="img"</code> when colour alone carries the meaning. Forced-colors mode is handled.</li>
+        <li>Arbitrary Tailwind palette colours, light/dark pairs, and literal CSS colours as first-class values.</li>
+        <li>A publishable config file, including a <code>colors.tokens</code> table for rebranding a token once.</li>
+        <li>English and Italian translations.</li>
+        <li><code>php artisan nova-field-indicator:upgrade</code>.</li>
+        <li>Real test coverage: 163 Pest tests and 17 Vitest tests, PHPStan level 6.</li>
+      </ul>
+    </section>
+
+    <section id="cl-changed">
+      <h2>Changed</h2>
+      <ul>
+        <li><b>Labels and colours are resolved on the server.</b> 2.x pushed the whole configuration into every row of an index; the payload now carries one resolved indicator per value.</li>
+        <li>Colours resolve to Nova&rsquo;s own <code>--colors-*</code> variables. The built-in names now match the Tailwind 3 palette.</li>
+        <li>The field is <code>Unfillable</code> and hidden on every form view.</li>
+        <li>Vite 6 replaces Laravel Mix. Output paths are unchanged.</li>
+        <li>The Vue component is now <code>nova-field-indicator</code>.</li>
+        <li>The bundle is 1.09&nbsp;kB gzipped, down from 1.4&nbsp;kB, despite the added features.</li>
+      </ul>
+    </section>
+
+    <section id="cl-removed">
+      <h2>Removed</h2>
+      <ul>
+        <li><code>shouldHide()</code>, <code>shouldHideIfNo()</code> and <code>withoutLabels()</code> &mdash; see <a href="#/upgrade">Upgrading</a>.</li>
+        <li>The <code>.indicator-*</code> CSS classes.</li>
+        <li>The <code>FormField</code> component, which was registered and bundled but unreachable.</li>
+        <li><code>spatie/laravel-package-tools</code>, which was required but never used.</li>
+        <li>Fifteen npm dependencies, six of them copy-pasted from <code>nova-field-map</code> and never referenced.</li>
+      </ul>
+    </section>
+
+    <div class="pager">
+      <a href="#/upgrade"><span>Previous</span><b>Upgrading</b></a>
+      <a class="next" href="#/home"><span>Next</span><b>Home</b></a>
+    </div>
+  </div>
+  <aside class="onthispage" aria-label="On this page"><h4>On this page</h4><ol data-toc></ol></aside>
+ </div>
+</section>
+
+</main>
+
+<footer class="sitefoot">
+  <div class="mx">
+    <div class="cols">
+      <div>
+        <h4>Package</h4>
+        <ul>
+          <li><a href="https://github.com/gabrielesbaiz/nova-field-indicator">GitHub</a></li>
+          <li><a href="https://packagist.org/packages/gabrielesbaiz/nova-field-indicator">Packagist</a></li>
+          <li><a href="#/changelog">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Documentation</h4>
+        <ul>
+          <li><a href="#/install">Installation</a></li>
+          <li><a href="#/guide">Guide</a></li>
+          <li><a href="#/configuration">Configuration</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Reference</h4>
+        <ul>
+          <li><a href="#/api">API reference</a></li>
+          <li><a href="#/colors">Colours</a></li>
+          <li><a href="#/upgrade">Upgrading from 2.x</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <ul>
+          <li><a href="#/security">Security policy</a></li>
+          <li><a href="https://github.com/gabrielesbaiz/nova-field-indicator/blob/main/CONTRIBUTING.md">Contributing</a></li>
+          <li><a href="https://github.com/sponsors/gabrielesbaiz">Sponsor</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="base">
+      <span>MIT licensed &middot; Built by Gabriele Sbaiz</span>
+      <span>Requires a Laravel Nova licence, sold separately</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ── the site menu, written once ──────────────────────────────────────
+     Every docs page gets the same nav from this one array, so a page can
+     never be added to the site without appearing in the menu — and the
+     command palette is built from the same source. */
+  const NAV = [
+    ['Getting started', [['#/install','Installation'], ['#/configuration','Configuration']]],
+    ['Usage',           [['#/guide','Guide'], ['#/colors','Colours']]],
+    ['Reference',       [['#/api','API reference']]],
+    ['Project',         [['#/security','Security'], ['#/upgrade','Upgrading'], ['#/changelog','Changelog']]],
+  ];
+
+  document.querySelectorAll('[data-nav]').forEach(host => {
+    host.innerHTML = NAV.map(([title, items]) =>
+      '<div class="group"><h4>' + title + '</h4><ul>' +
+      items.map(([href, label]) => '<li><a href="' + href + '">' + label + '</a></li>').join('') +
+      '</ul></div>').join('');
+  });
+
+  /* ── theme ─────────────────────────────────────────────────────────── */
+  const mode = document.getElementById('mode');
+  const prefersDark = matchMedia('(prefers-color-scheme: dark)');
+  const isDark = () => {
+    const explicit = document.documentElement.dataset.theme;
+    return explicit ? explicit === 'dark' : prefersDark.matches;
+  };
+  const syncTheme = () => {
+    /* The button names the theme it switches TO. */
+    mode.textContent = isDark() ? 'Light' : 'Dark';
+    /* The indicator CSS keys dark mode off a .dark ancestor, exactly as it
+       does inside Nova, so the demos switch with the page. */
+    document.body.classList.toggle('dark', isDark());
+  };
+  mode.addEventListener('click', () => {
+    document.documentElement.dataset.theme = isDark() ? 'light' : 'dark';
+    syncTheme();
+  });
+  prefersDark.addEventListener('change', syncTheme);
+  syncTheme();
+
+  /* ── scroll progress ───────────────────────────────────────────────── */
+  const bar = document.getElementById('progress');
+  let ticking = false;
+  const paintBar = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = (max > 0 ? Math.min(100, Math.max(0, (scrollY / max) * 100)) : 0) + '%';
+    ticking = false;
+  };
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(paintBar); } }, { passive: true });
+  addEventListener('resize', paintBar, { passive: true });
+  paintBar();
+
+  /* ── the status board ──────────────────────────────────────────────────
+     Every cell is a real mark driven by --nfi-color, so the hero is the
+     package rendering itself rather than a picture of it. */
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const board = document.getElementById('board');
+  const PAL = ['green-500','red-500','yellow-500','sky-500','violet-500','emerald-500','orange-500','pink-500','indigo-500'];
+  if (board) {
+    const CELLS = 18 * 7;
+    const cells = [];
+    for (let i = 0; i < CELLS; i++) {
+      const cell = document.createElement('i');
+      board.appendChild(cell);
+      cells.push(cell);
+    }
+    const light = cell => {
+      const token = PAL[(Math.random() * PAL.length) | 0];
+      cell.style.background = 'rgba(var(--colors-' + token + '))';
+      cell.classList.add('lit');
+    };
+    if (calm) {
+      /* Resolve straight to the finished state. */
+      cells.forEach((c, i) => { if (i % 3 === 0) light(c); });
+    } else {
+      /* A wave sweeps left to right, settling about a third of the grid. */
+      cells.forEach((cell, i) => {
+        const col = i % 18, row = (i / 18) | 0;
+        setTimeout(() => {
+          light(cell);
+          if (Math.random() > .36) {
+            setTimeout(() => {
+              cell.classList.remove('lit');
+              cell.style.background = '';
+            }, 900 + Math.random() * 1400);
+          }
+        }, 220 + col * 46 + row * 22 + Math.random() * 160);
+      });
+    }
+  }
+
+  /* ── the colour tokens, rendered by the package's own CSS ──────────── */
+  const TOKENS = [
+    ['success', 'green-500',  'green-400',  'was var(--success) — invisible on Nova 5'],
+    ['danger',  'red-500',    'red-400',    'was var(--danger) — invisible on Nova 5'],
+    ['warning', 'yellow-500', 'yellow-300', 'was var(--warning) — invisible on Nova 5'],
+    ['info',    'sky-500',    'sky-400',    'was var(--info) — invisible on Nova 5'],
+    ['primary', 'sky-500',    'sky-400',    "Nova's themeable alias"],
+    ['gray',    'gray-400',   'gray-400',   'also spelled grey'],
+    ['grey',    'gray-400',   'gray-400',   'both spellings kept from 2.x'],
+    ['black',   'gray-900',   'gray-100',   'inverts rather than lightening'],
+    ['white',   'gray-100',   'gray-100',   'shade-less in Nova’s palette'],
+  ];
+  const wall = document.getElementById('tokenwall');
+  if (wall) {
+    wall.innerHTML = TOKENS.map(([name, l, d, note]) =>
+      '<div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">' +
+        '<span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-' + l + '));--nfi-color-dark:rgba(var(--colors-' + d + '))">' +
+          '<span class="nfi-mark"></span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:.78rem">' + name + '</span></span>' +
+        '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:.68rem;color:var(--muted)">' + l + ' / ' + d + '</span>' +
+        '<span style="font-size:.8rem;color:var(--sub)">' + note + '</span>' +
+      '</div>').join('');
+  }
+
+  /* ── the palette wall ──────────────────────────────────────────────── */
+  const FAMILIES = ['primary','slate','gray','zinc','neutral','stone','red','orange','amber','yellow',
+                    'lime','green','emerald','teal','cyan','sky','blue','indigo','violet','purple',
+                    'fuchsia','pink','rose'];
+  const SHADES = [50,100,200,300,400,500,600,700,800,900,950];
+  const wallEl = document.getElementById('wall');
+  const wallNote = document.getElementById('wallnote');
+  if (wallEl) {
+    /* Nova defines these at :root in a real app; the page only declares the
+       handful the demos above need, so the wall paints its own from HSL
+       approximations of the Tailwind ramp. The point is the interaction and
+       the naming, and that is exact. */
+    const hue = {primary:199,slate:215,gray:215,zinc:240,neutral:0,stone:25,red:0,orange:25,amber:38,
+                 yellow:48,lime:85,green:142,emerald:160,teal:173,cyan:189,sky:199,blue:217,
+                 indigo:239,violet:258,purple:271,fuchsia:292,pink:330,rose:350};
+    const sat = f => (f === 'neutral' ? 0 : f === 'slate' || f === 'gray' || f === 'zinc' || f === 'stone' ? 16 : 84);
+    const lig = s => 97 - (SHADES.indexOf(s) * 8.6);
+    wallEl.innerHTML =
+      '<div style="display:grid;grid-template-columns:5.2rem repeat(11,1fr);gap:.25rem;align-items:center">' +
+      '<span></span>' + SHADES.map(s =>
+        '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:.58rem;color:var(--muted);text-align:center">' + s + '</span>').join('') +
+      FAMILIES.map(f => '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:.66rem;color:var(--sub)">' + f + '</span>' +
+        SHADES.map(s =>
+          '<button type="button" data-token="' + f + '-' + s + '" title="' + f + '-' + s + '" ' +
+          'style="all:unset;cursor:pointer;aspect-ratio:1;border-radius:999px;background:hsl(' +
+          hue[f] + ' ' + sat(f) + '% ' + lig(s) + '%)"></button>').join('')).join('') +
+      '</div>';
+
+    wallEl.addEventListener('click', e => {
+      const btn = e.target.closest('[data-token]');
+      if (!btn) return;
+      const php = "->colors(['status' => '" + btn.dataset.token + "'])";
+      navigator.clipboard?.writeText(php);
+      wallNote.textContent = 'Copied  ' + php;
+    });
+  }
+
+  /* ── copy buttons ──────────────────────────────────────────────────── */
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pre = btn.closest('.code')?.querySelector('pre');
+      if (!pre) return;
+      navigator.clipboard?.writeText(pre.textContent.trim());
+      const was = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = was; }, 1400);
+    });
+  });
+
+  /* ── router ────────────────────────────────────────────────────────── */
+  const pages = [...document.querySelectorAll('.page')];
+  const navLinks = [...document.querySelectorAll('#nav a[href^="#/"]')];
+  let sections = [];
+
+  const buildToc = page => {
+    const toc = page.querySelector('[data-toc]');
+    sections = [];
+    if (!toc) return;
+    toc.innerHTML = '';
+    const found = [...page.querySelectorAll('.body section[id]')];
+    if (found.length < 3) { toc.closest('.onthispage').style.display = 'none'; return; }
+    found.forEach(el => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#' + el.id;
+      a.textContent = (el.querySelector('h2')?.textContent || el.id).trim();
+      a.addEventListener('click', ev => {
+        /* The router owns #/... hashes; a section link must not reroute. */
+        ev.preventDefault();
+        el.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+      });
+      li.appendChild(a); toc.appendChild(li);
+      sections.push({ a, el });
+    });
+    const spy = new IntersectionObserver(es => {
+      const vis = es.filter(e => e.isIntersecting)
+                    .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (!vis.length) return;
+      const hit = sections.find(s => s.el === vis[0].target);
+      if (hit) sections.forEach(s => s.a.setAttribute('aria-current', String(s === hit)));
+    }, { rootMargin: '-15% 0px -70% 0px' });
+    sections.forEach(s => spy.observe(s.el));
+  };
+
+  const route = () => {
+    const id = location.hash.replace('#/', '') || 'home';
+    const page = document.getElementById(id) || document.getElementById('home');
+    pages.forEach(p => p.classList.toggle('hidden', p !== page));
+    navLinks.forEach(a => a.setAttribute('aria-current', String(a.getAttribute('href') === '#/' + page.id)));
+    page.querySelectorAll('[data-nav] a').forEach(a => {
+      if (a.getAttribute('href') === '#/' + page.id) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    buildToc(page);
+    scrollTo({ top: 0, behavior: 'auto' });
+  };
+  addEventListener('hashchange', route);
+  route();
+
+  /* ── command palette ───────────────────────────────────────────────── */
+  const pal = document.getElementById('pal');
+  const input = document.getElementById('palInput');
+  const list = document.getElementById('palList');
+  const open = document.getElementById('openPal');
+  document.getElementById('kbd').textContent =
+    /Mac|iPhone|iPad/.test(navigator.platform || '') ? '⌘K' : 'Ctrl K';
+
+  const pageItems = NAV.flatMap(([, items]) => items.map(([href, label]) => ({ label, hint: 'Page', href })));
+  let rows = [], cursor = 0;
+  const select = () => rows.forEach((r, i) => r.li.setAttribute('aria-selected', String(i === cursor)));
+  const go = item => {
+    pal.hidden = true; open.focus();
+    if (item.section) {
+      location.hash = item.href;
+      requestAnimationFrame(() => document.getElementById(item.section)?.scrollIntoView({ block: 'start' }));
+    } else if (item.href) location.hash = item.href;
+  };
+  const items = () => [
+    { label: 'Home', hint: 'Page', href: '#/home' },
+    ...pageItems,
+    /* Sections of the page currently open, so the palette always reflects
+       what the right rail is showing. */
+    ...sections.map(s => ({ label: s.a.textContent, hint: 'Section',
+                            href: location.hash || '#/home', section: s.el.id })),
+  ];
+  const render = (q = '') => {
+    const hits = items().filter(i => i.label.toLowerCase().includes(q.trim().toLowerCase()));
+    list.innerHTML = ''; rows = []; cursor = 0;
+    hits.forEach((item, i) => {
+      const li = document.createElement('li');
+      li.setAttribute('role', 'option');
+      li.innerHTML = '<b></b><em></em>';
+      li.firstChild.textContent = item.label;
+      li.lastChild.textContent = item.hint;
+      li.addEventListener('click', () => go(item));
+      li.addEventListener('mousemove', () => { cursor = i; select(); });
+      list.appendChild(li); rows.push({ li, item });
+    });
+    select();
+  };
+  const show = () => { pal.hidden = false; input.value = ''; render(); input.focus(); };
+  open.addEventListener('click', show);
+  input.addEventListener('input', () => render(input.value));
+  pal.addEventListener('click', e => { if (e.target === pal) { pal.hidden = true; open.focus(); } });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { pal.hidden = true; open.focus(); }
+    else if (e.key === 'ArrowDown' && rows.length) { e.preventDefault(); cursor = (cursor + 1) % rows.length; select(); }
+    else if (e.key === 'ArrowUp' && rows.length) { e.preventDefault(); cursor = (cursor - 1 + rows.length) % rows.length; select(); }
+    else if (e.key === 'Enter' && rows[cursor]) { e.preventDefault(); go(rows[cursor].item); }
+  });
+  addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); pal.hidden ? show() : (pal.hidden = true); }
+    else if (e.key === '/' && pal.hidden && !/input|textarea/i.test(e.target.tagName)) { e.preventDefault(); show(); }
+  });
+})();
+</script>
