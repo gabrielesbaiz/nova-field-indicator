@@ -327,7 +327,7 @@ class UpgradeCommand extends Command
             'callable' => 'Behaviour changed — 2.x INVOKED this string as a callback, 3.0 compares it as a value',
             'strict' => 'Comparison tightened — verify these still hide the rows you expect',
             'ambiguous' => 'Ambiguous argument — a callable array, or a list of values?',
-            'contradictory' => 'withoutLabels() together with labels() — contradictory in 2.x, resolve by hand',
+            'contradictory' => 'withoutLabels() left in place because the file also uses labels() — remove it by hand',
             'resolveForDisplay' => 'Overrides resolveForDisplay() — resolution moved to jsonSerialize()/resolveIndicatorFor()',
             'color' => 'Colour literals the resolver rejects',
             'frontend' => 'References removed CSS classes, component names or payload keys',
