@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # No secrets, so this runs on fork pull requests too.
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+      # dist/ is committed and served by the service provider, so a change to
+      # resources/ without a rebuild would ship stale assets to every user.
+      - name: Check dist is up to date
+        run: git diff --exit-code -- dist
+
+  php:
+    name: "PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}"
+    runs-on: ubuntu-latest
+    # Nova is a paid, private Composer repository, and forks cannot read
+    # secrets — so skip rather than fail red on fork pull requests.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+        laravel: ['12.*', '13.*']
+    env:
+      # One repository secret holding:
+      # {"http-basic":{"nova.laravel.com":{"username":"<nova email>","password":"<nova API key>"}}}
+      # Composer reads this natively, so no credential is ever written to disk.
+      COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - run: composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
+      - run: composer update --prefer-dist --no-interaction
+
+      - run: vendor/bin/pint --test
+      - run: vendor/bin/phpstan analyse --no-progress --error-format=github
+      - run: vendor/bin/pest --ci
