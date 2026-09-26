@@ -1,11 +1,11 @@
 <p align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="art/nova-field-indicator-logo.png">
-        <img src="art/nova-field-indicator-logo-light.png" alt="NovaFieldIndicator" width="600">
+        <img src="art/nova-field-indicator-logo-light.png" alt="NovaField Indicator" width="600">
     </picture>
 </p>
 
-# Nova Field Indicator
+# NovaField Indicator
 
 A colour-coded status indicator for Laravel Nova — a dot, ring, square or pill that
 reads a value and shows what it means, configured from the enum your application
