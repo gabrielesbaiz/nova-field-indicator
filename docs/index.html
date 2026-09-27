@@ -5,6 +5,8 @@
 <meta property="og:title" content="NovaField Indicator">
 <meta property="og:description" content="A status column whose colours are yours, whose states come from an enum, and which still reads correctly in dark mode and to a screen reader.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://gabrielesbaiz.github.io/nova-field-indicator/art/nova-field-indicator-logo.png">
+<meta name="twitter:image" content="https://gabrielesbaiz.github.io/nova-field-indicator/art/nova-field-indicator-logo.png">
 <meta property="og:url" content="https://gabrielesbaiz.github.io/nova-field-indicator/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="NovaField Indicator">
@@ -226,6 +228,17 @@ h1,h2,h3{letter-spacing:-.03em}
 <style>
 /* ── hero ─────────────────────────────────────────────────────────────── */
 .hero{padding-block:clamp(2.6rem,6vw,4.6rem);border-bottom:1px solid var(--rule)}
+/* The lockup ships as two files rather than one tinted mark: the wordmark is
+   white on the dark art and ink on the light one, so each theme gets the file
+   drawn for it. Both are in the markup; CSS picks. */
+.hero .mark{display:block;width:min(27rem,74vw);height:auto;margin:0 0 1.5rem}
+.hero .mark.on-dark{display:none}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .hero .mark.on-dark{display:block}
+  :root:not([data-theme="light"]) .hero .mark.on-light{display:none}
+}
+:root[data-theme="dark"] .hero .mark.on-dark{display:block}
+:root[data-theme="dark"] .hero .mark.on-light{display:none}
 .hero .grid{display:grid;gap:clamp(2rem,5vw,3.4rem);grid-template-columns:1fr;align-items:center}
 @media(min-width:1000px){.hero .grid{grid-template-columns:1.02fr .98fr}}
 .hero h1{font-size:clamp(2.5rem,6.4vw,4.4rem);font-weight:900;line-height:.98;
@@ -397,6 +410,10 @@ h1,h2,h3{letter-spacing:-.03em}
   <div class="hero">
     <div class="mx grid">
       <div>
+        <img class="mark on-light" src="art/nova-field-indicator-logo-light.png"
+             alt="NovaField Indicator" width="1600" height="533">
+        <img class="mark on-dark" src="art/nova-field-indicator-logo.png"
+             alt="" aria-hidden="true" width="1600" height="533">
         <p class="eyebrow">Laravel Nova 5 &middot; field</p>
         <h1>Status you can <em>read</em> at a glance.</h1>
         <p class="lede">
