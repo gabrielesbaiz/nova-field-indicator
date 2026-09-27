@@ -18,7 +18,7 @@ it('is unfillable, so nothing can write through it', function () {
 });
 
 /*
- * Replaces 2.x's $showOnCreation/$showOnUpdate pair, which missed the attach
+ * Replaces 1.x's $showOnCreation/$showOnUpdate pair, which missed the attach
  * and update-attached views.
  */
 it('is hidden on every form view by default', function () {

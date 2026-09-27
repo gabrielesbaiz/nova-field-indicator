@@ -10,32 +10,33 @@
 <meta name="twitter:title" content="NovaField Indicator">
 <meta name="twitter:description" content="Colour-coded status fields for Laravel Nova. Enum-first, accessible, dark-mode aware.">
 <link rel="canonical" href="https://gabrielesbaiz.github.io/nova-field-indicator/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%2300c2a8'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%230ea5e9'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 
 <style>
 /* ── tokens ──────────────────────────────────────────────────────────────
-   The accent is a jade-cyan on purpose: it is not one of the four semantic
-   colours this package ships, so a demo indicator never reads as "this
-   example is a success state" just because the chrome around it is green. */
+   Nova's own sky accent, so the page reads as an extension of the admin panel
+   the field lives in. Sky is not one of the four semantic colours this package
+   ships, so a demo indicator never reads as "this example is a success state"
+   just because the chrome around it matches. */
 :root{
-  --paper:#fbfbfa; --ink:#101113; --sub:#4b4f55; --muted:#686d74;
-  --rule:#e3e4e2; --wash:#f1f2f0;
-  --accent:#00c2a8; --accent-text:#006d5d; --accent-ink:#00201b;
+  --paper:#f7f8fa; --ink:#18181b; --sub:#4a4f57; --muted:#666c76;
+  --rule:#e2e5ea; --wash:#eef1f5;
+  --accent:#0ea5e9; --accent-text:#0369a1; --accent-ink:#031f2e;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --paper:#0c0d10; --ink:#f3f4f6; --sub:#a9aeb7; --muted:#7b8089;
-    --rule:#23262c; --wash:#15171b;
-    --accent:#2ee6c5; --accent-text:#2ee6c5; --accent-ink:#04201b;
+    --paper:#0b0f14; --ink:#eef2f6; --sub:#a3abb6; --muted:#79828e;
+    --rule:#1d242d; --wash:#12171e;
+    --accent:#38bdf8; --accent-text:#38bdf8; --accent-ink:#031f2e;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#0c0d10; --ink:#f3f4f6; --sub:#a9aeb7; --muted:#7b8089;
-  --rule:#23262c; --wash:#15171b;
-  --accent:#2ee6c5; --accent-text:#2ee6c5; --accent-ink:#04201b;
+  --paper:#0b0f14; --ink:#eef2f6; --sub:#a3abb6; --muted:#79828e;
+  --rule:#1d242d; --wash:#12171e;
+  --accent:#38bdf8; --accent-text:#38bdf8; --accent-ink:#031f2e;
 }
 
 *{box-sizing:border-box}
@@ -46,7 +47,7 @@ body{margin:0;background:var(--paper);color:var(--ink);
 :focus-visible{outline:2px solid var(--accent-text);outline-offset:3px}
 h1,h2,h3{letter-spacing:-.03em}
 
-.mx{max-width:74rem;margin:0 auto;padding-inline:clamp(1.1rem,4vw,2.6rem)}
+.mx{max-width:86rem;margin:0 auto;padding-inline:clamp(1.1rem,4vw,2.6rem)}
 .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.2em;
   text-transform:uppercase;color:var(--accent-text);margin:0}
 .num{font-variant-numeric:tabular-nums}
@@ -172,6 +173,31 @@ h1,h2,h3{letter-spacing:-.03em}
 .novapanel td{padding:.62rem .9rem;border-bottom:1px solid var(--rule);color:var(--sub)}
 .novapanel tr:last-child td{border-bottom:0}
 .novapanel td.name{color:var(--ink);font-weight:700}
+.novapanel tr.gone{display:none}
+.novapanel .bar .t{font-family:Chivo,sans-serif;font-size:.82rem;font-weight:700;
+  letter-spacing:-.02em;text-transform:none;color:var(--ink)}
+.novapanel .bar .filter{margin-left:auto;display:inline-flex;align-items:center;gap:.35rem;
+  font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  font-weight:600;cursor:pointer;color:var(--accent-text);
+  border:1px solid color-mix(in srgb,var(--accent-text) 40%,transparent);
+  background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:999px;padding:.14rem .55rem}
+.novapanel .bar .filter:hover{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+
+/* The hero controls: one button per option the PHP API exposes. */
+.ctl{display:flex;flex-wrap:wrap;gap:1.1rem;margin-top:.9rem;align-items:center}
+.ctlgroup{display:flex;align-items:center;gap:.35rem}
+.ctlgroup>span{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);margin-right:.15rem}
+.ctl button{font:inherit;font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.08em;
+  text-transform:uppercase;cursor:pointer;background:transparent;color:var(--muted);
+  border:1px solid var(--rule);border-radius:999px;padding:.18rem .6rem}
+.ctl button:hover{color:var(--ink)}
+.ctl button[aria-pressed="true"]{color:var(--accent-text);border-color:var(--accent-text);
+  background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight:600}
+.ctlcode{margin-top:.85rem;font-family:"IBM Plex Mono",monospace;font-size:.74rem;line-height:1.7;
+  color:var(--sub);background:var(--wash);border:1px solid var(--rule);border-radius:.5rem;
+  padding:.65rem .85rem;overflow-x:auto;white-space:pre}
+.ctlcode b{color:var(--accent-text);font-weight:500}
 
 /* ── code ─────────────────────────────────────────────────────────────── */
 .code{background:var(--wash);border:1px solid var(--rule);border-radius:.55rem;overflow:hidden}
@@ -191,14 +217,14 @@ h1,h2,h3{letter-spacing:-.03em}
 .copybtn:hover{color:var(--accent-text);border-color:var(--accent-text)}
 
 .pair{display:grid;gap:1rem;grid-template-columns:1fr;align-items:start}
-@media(min-width:900px){.pair{grid-template-columns:1.05fr .95fr;gap:1.4rem}}
+@media(min-width:900px){.pair{grid-template-columns:1.1fr .9fr;gap:1.4rem}}
 .out{border:1px solid var(--rule);border-radius:.55rem;background:var(--paper);padding:1rem 1.1rem}
 .out .lab{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.14em;
   text-transform:uppercase;color:var(--muted);margin:0 0 .75rem}
 .rows{display:grid;gap:.55rem}
 </style>
 <style>
-/* ── hero: the status board ───────────────────────────────────────────── */
+/* ── hero ─────────────────────────────────────────────────────────────── */
 .hero{padding-block:clamp(2.6rem,6vw,4.6rem);border-bottom:1px solid var(--rule)}
 .hero .grid{display:grid;gap:clamp(2rem,5vw,3.4rem);grid-template-columns:1fr;align-items:center}
 @media(min-width:1000px){.hero .grid{grid-template-columns:1.02fr .98fr}}
@@ -213,19 +239,6 @@ h1,h2,h3{letter-spacing:-.03em}
   text-transform:uppercase;color:var(--muted)}
 .hero .facts b{display:block;font-family:Chivo,sans-serif;font-size:1.35rem;letter-spacing:-.03em;
   color:var(--ink);text-transform:none;margin-bottom:.1rem}
-
-/* The board: every cell is a real indicator mark, driven by the same
-   --nfi-color custom property the package uses. */
-.board{border:1px solid var(--rule);border-radius:.7rem;background:var(--wash);padding:1.1rem;
-  display:grid;grid-template-columns:repeat(18,1fr);gap:.42rem}
-.board i{display:block;aspect-ratio:1;border-radius:999px;background:rgba(var(--colors-gray-400));
-  opacity:.28;transition:background .5s ease,opacity .5s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
-.board i.lit{opacity:1;transform:scale(1.08)}
-.boardcap{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.85rem;
-  font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--muted)}
-.boardcap span{display:inline-flex;align-items:center;gap:.4rem}
-.boardcap b{width:.5rem;height:.5rem;border-radius:999px;display:inline-block}
 
 /* ── landing bands ────────────────────────────────────────────────────── */
 .band{padding-block:clamp(2.6rem,6vw,4.4rem);border-bottom:1px solid var(--rule)}
@@ -343,13 +356,12 @@ h1,h2,h3{letter-spacing:-.03em}
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
     transition-duration:.001ms!important}
   .reveal{opacity:1;transform:none}
-  .board i{opacity:1}
 }
 </style>
 
 <header class="top">
   <div class="mx in">
-    <a class="brand" href="#/home"><span class="bdot" aria-hidden="true"></span>NovaField Indicator <span class="ver">v3.0.0</span></a>
+    <a class="brand" href="#/home"><span class="bdot" aria-hidden="true"></span>NovaField Indicator <span class="ver">v2.0.0</span></a>
     <nav id="nav">
       <a href="#/install">Install</a>
       <a href="#/guide">Guide</a>
@@ -398,21 +410,40 @@ h1,h2,h3{letter-spacing:-.03em}
           <a class="btn ghost" href="https://github.com/gabrielesbaiz/nova-field-indicator">View on GitHub</a>
         </div>
         <div class="facts">
-          <div><b class="num">1.09 kB</b>JS, gzipped</div>
+          <div><b class="num">1.07 kB</b>JS, gzipped</div>
           <div><b class="num">186</b>tests</div>
           <div><b class="num">0</b>runtime deps</div>
         </div>
       </div>
 
+      <!-- A real resource index, drawn with the same CSS the package ships,
+           with the controls wired to the same options the PHP API exposes. -->
       <div>
-        <div class="board" id="board" aria-hidden="true"></div>
-        <div class="boardcap">
-          <span><b style="background:rgba(var(--colors-green-500))"></b>success</span>
-          <span><b style="background:rgba(var(--colors-red-500))"></b>danger</span>
-          <span><b style="background:rgba(var(--colors-yellow-500))"></b>warning</span>
-          <span><b style="background:rgba(var(--colors-sky-500))"></b>info</span>
-          <span><b style="background:rgba(var(--colors-gray-400))"></b>unset</span>
+        <div class="novapanel">
+          <div class="bar">
+            <span class="t">Users</span>
+            <button class="filter" id="filterBtn" type="button" aria-pressed="false">Status: all</button>
+          </div>
+          <table id="novatable"><tbody></tbody></table>
         </div>
+
+        <div class="ctl" id="ctl">
+          <div class="ctlgroup" data-group="shape">
+            <span>Shape</span>
+            <button type="button" data-v="dot" aria-pressed="true">dot</button>
+            <button type="button" data-v="ring" aria-pressed="false">ring</button>
+            <button type="button" data-v="square" aria-pressed="false">square</button>
+            <button type="button" data-v="pill" aria-pressed="false">pill</button>
+          </div>
+          <div class="ctlgroup" data-group="size">
+            <span>Size</span>
+            <button type="button" data-v="sm" aria-pressed="false">sm</button>
+            <button type="button" data-v="md" aria-pressed="true">md</button>
+            <button type="button" data-v="lg" aria-pressed="false">lg</button>
+          </div>
+        </div>
+
+        <div class="ctlcode" id="ctlcode" aria-live="polite"></div>
       </div>
     </div>
   </div>
@@ -556,7 +587,7 @@ h1,h2,h3{letter-spacing:-.03em}
 
       <div class="pair" style="margin-top:1.6rem">
         <div class="code">
-          <div class="lab"><span>2.x &mdash; per row</span></div>
+          <div class="lab"><span>1.x &mdash; per row</span></div>
 <pre><span class="c">// repeated on all 50 rows</span>
 {
   <span class="s">"labels"</span>: { <span class="s">"active"</span>: <span class="s">"Active"</span>, <span class="s">"banned"</span>: <span class="s">"Banned"</span>, <span class="c">/* … */</span> },
@@ -566,7 +597,7 @@ h1,h2,h3{letter-spacing:-.03em}
 }</pre>
         </div>
         <div class="code">
-          <div class="lab"><span>3.0 &mdash; per row</span></div>
+          <div class="lab"><span>2.0 &mdash; per row</span></div>
 <pre>{
   <span class="s">"indicators"</span>: [{
     <span class="s">"value"</span>: <span class="s">"active"</span>,
@@ -583,7 +614,7 @@ h1,h2,h3{letter-spacing:-.03em}
       <div class="note" style="max-width:none">
         <b>A side effect worth naming.</b> Because the browser no longer inspects
         a colour string, colour literals are validated once, server-side, against
-        an anchored allow-list. The 2.x client-side regex was unanchored and would
+        an anchored allow-list. The 1.x client-side regex was unanchored and would
         have accepted <code>#fff; background-image:url(&hellip;)</code>.
       </div>
     </div>
@@ -699,16 +730,26 @@ h1,h2,h3{letter-spacing:-.03em}
     <section id="install-req">
       <h2>Requirements</h2>
       <table>
-        <tr><th>&nbsp;</th><th>2.x</th><th>3.0</th></tr>
+        <tr><th>&nbsp;</th><th>1.x</th><th>2.0</th></tr>
         <tr><td>PHP</td><td><code>^8.0</code></td><td><code>^8.3</code></td></tr>
         <tr><td>Laravel</td><td>10, 11, 12</td><td>12, 13</td></tr>
-        <tr><td>Nova</td><td><code>^5.0</code></td><td><code>^5.7</code> (<code>&lt;6.0</code>)</td></tr>
+        <tr><td>Nova</td><td><code>^4.0</code></td><td><code>^5.11</code> (<code>&lt;6.0</code>)</td></tr>
       </table>
       <p>
         Nova 6 is explicitly conflicted rather than merely untested, so Composer
         will refuse the combination instead of letting you find out at runtime.
-        <code>laravel/nova</code> is a runtime requirement in 3.0, not a dev
+        <code>laravel/nova</code> is a runtime requirement in 2.0, not a dev
         dependency.
+      </p>
+      <p>
+        The Nova floor is <b>5.11</b>, not 5.7, for one reason:
+        <code>Field::configureDefaults()</code> arrives in 5.11, and that is the
+        hook this field applies <code>exceptOnForms()</code> and the
+        <code>inline</code> default through. The override is declared with PHP&rsquo;s
+        <code>#[Override]</code> attribute, so on an older Nova the class fails to
+        load at all &mdash; which is the failure you want. Without the attribute the
+        class would load, the hook would never run, and the field would quietly
+        appear on create and update forms.
       </p>
     </section>
 
@@ -761,7 +802,7 @@ php artisan vendor:publish --tag=nova-field-indicator-lang</pre>
         Nova&rsquo;s own <code>Badge</code> behaves.
       </p>
       <div class="note">
-        <b>Coming from 2.x?</b> Read <a href="#/upgrade">Upgrading</a> first.
+        <b>Coming from 1.x?</b> Read <a href="#/upgrade">Upgrading</a> first.
         The <code>success</code>, <code>danger</code>, <code>warning</code> and
         <code>info</code> colours rendered an invisible dot on Nova 5 and now
         appear, so columns that looked empty will fill with colour.
@@ -930,7 +971,7 @@ php artisan vendor:publish --tag=nova-field-indicator-lang</pre>
         cost is not paid per row.
       </p>
       <div class="note">
-        <b>One behaviour change worth knowing.</b> In 2.x a string argument was
+        <b>One behaviour change worth knowing.</b> In 1.x a string argument was
         tested with <code>is_callable()</code> first, so
         <code>shouldHide('trim')</code> silently <em>invoked</em> <code>trim()</code>
         as the predicate. <code>hideWhen()</code> dispatches on the declared type,
@@ -1032,7 +1073,7 @@ php artisan vendor:publish --tag=nova-field-indicator-lang</pre>
       <h2>The built-in tokens</h2>
       <p>
         Nine names, resolved for you. The first four are the ones that rendered
-        invisibly in 2.x.
+        invisibly in 1.x.
       </p>
       <div id="tokenwall" class="rows" style="margin-top:1.1rem"></div>
     </section>
@@ -1106,7 +1147,7 @@ php artisan vendor:publish --tag=nova-field-indicator-lang</pre>
     <span class="s">'tokens'</span> =&gt; [
         <span class="s">'brand'</span>   =&gt; [<span class="s">'light'</span> =&gt; <span class="s">'violet-600'</span>, <span class="s">'dark'</span> =&gt; <span class="s">'violet-400'</span>],
         <span class="s">'success'</span> =&gt; <span class="s">'emerald-600'</span>,   <span class="c">// override a built-in</span>
-        <span class="s">'green'</span>   =&gt; <span class="s">'#38C172'</span>,      <span class="c">// pin a 2.x colour exactly</span>
+        <span class="s">'green'</span>   =&gt; <span class="s">'#38C172'</span>,      <span class="c">// pin a 1.x colour exactly</span>
     ],
 ],</pre>
       </div>
@@ -1338,8 +1379,7 @@ php artisan vendor:publish --tag=nova-field-indicator-lang</pre>
       </p>
       <table>
         <tr><th>Version</th><th>Supported</th></tr>
-        <tr><td>3.x</td><td>Yes</td></tr>
-        <tr><td>2.x</td><td>No</td></tr>
+        <tr><td>2.x</td><td>Yes</td></tr>
         <tr><td>1.x</td><td>No</td></tr>
       </table>
     </section>
@@ -1393,14 +1433,14 @@ php artisan vendor:publish --tag=nova-field-indicator-lang</pre>
  <div class="mx docs">
   <aside class="sidenav" data-nav aria-label="Documentation"></aside>
   <div class="body">
-    <h1>Upgrading from 2.x</h1>
+    <h1>Upgrading from 1.x</h1>
     <p class="lede">A clean break, with a command that does most of it for you.</p>
 
     <section id="up-start">
       <h2>Start here</h2>
       <div class="code">
         <div class="lab"><span>Terminal</span><button class="copybtn" type="button">Copy</button></div>
-<pre>composer require gabrielesbaiz/nova-field-indicator:^3.0
+<pre>composer require gabrielesbaiz/nova-field-indicator:^2.0
 php artisan nova-field-indicator:upgrade --dry-run</pre>
       </div>
       <p>
@@ -1417,10 +1457,10 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
     <section id="up-invisible">
       <h2>1. Four colours were invisible and now appear</h2>
       <p>
-        This is the reason 3.0 exists, and it is a fix that reads as a change.
+        This is the reason 2.0 exists, and it is a fix that reads as a change.
       </p>
       <p>
-        In 2.x, <code>success</code>, <code>danger</code>, <code>warning</code> and
+        In 1.x, <code>success</code>, <code>danger</code>, <code>warning</code> and
         <code>info</code> were styled as <code>var(--success)</code> and friends.
         Those CSS variables existed in Nova 3 and 4. <b>Nova 5 does not define
         them</b>, so the mark painted with an invalid colour and rendered
@@ -1428,7 +1468,7 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
       </p>
       <div class="pair" style="margin-top:1.4rem">
         <div class="out">
-          <p class="lab">2.x on Nova 5</p>
+          <p class="lab">1.x on Nova 5</p>
           <div class="rows">
             <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:var(--success);--nfi-color-dark:var(--success)"><span class="nfi-mark"></span><span>Active</span></span>
             <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:var(--danger);--nfi-color-dark:var(--danger)"><span class="nfi-mark"></span><span>Banned</span></span>
@@ -1436,7 +1476,7 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
           <p style="font-size:.82rem;color:var(--muted);margin:.9rem 0 0">The marks above are genuinely there &mdash; and genuinely invisible.</p>
         </div>
         <div class="out">
-          <p class="lab">3.0</p>
+          <p class="lab">2.0</p>
           <div class="rows">
             <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-green-500));--nfi-color-dark:rgba(var(--colors-green-400))"><span class="nfi-mark"></span><span>Active</span></span>
             <span class="nfi" data-shape="dot" data-size="md" style="--nfi-color:rgba(var(--colors-red-500));--nfi-color-dark:rgba(var(--colors-red-400))"><span class="nfi-mark"></span><span>Banned</span></span>
@@ -1448,9 +1488,9 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
 
     <section id="up-hues">
       <h2>2. Every named colour shifts hue</h2>
-      <p>2.x hard-coded the <b>Tailwind v1</b> palette. 3.0 resolves to Nova&rsquo;s, which is Tailwind 3.</p>
+      <p>1.x hard-coded the <b>Tailwind v1</b> palette. 2.0 resolves to Nova&rsquo;s, which is Tailwind 3.</p>
       <table>
-        <tr><th>Name</th><th>2.x</th><th>3.0</th><th>Change</th></tr>
+        <tr><th>Name</th><th>1.x</th><th>2.0</th><th>Change</th></tr>
         <tr><td><code>grey</code> / <code>gray</code></td><td><code>#B8C2CC</code></td><td><code>gray-400</code></td><td>cooler, darker</td></tr>
         <tr><td><code>black</code></td><td><code>#22292F</code></td><td><code>gray-900</code></td><td>darker</td></tr>
         <tr><td><code>red</code></td><td><code>#E3342F</code></td><td><code>red-500</code></td><td>lighter, less orange</td></tr>
@@ -1473,12 +1513,12 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
     <section id="up-css">
       <h2>3. Custom <code>.indicator-*</code> CSS stops applying</h2>
       <p>
-        2.x invited this, because colours were class names &mdash;
+        1.x invited this, because colours were class names &mdash;
         <code>.indicator-brand { background: #123456 }</code> in your stylesheet,
         then <code>->colors(['active' =&gt; 'brand'])</code>.
       </p>
       <p>
-        3.0 emits no <code>indicator-*</code> class at all, so those rules are dead
+        2.0 emits no <code>indicator-*</code> class at all, so those rules are dead
         and the value falls back to neutral grey. This is the sharpest real break
         in the release, and it is deliberate: keeping a legacy hook class would
         re-create exactly the stylesheet-source-order fragility being removed.
@@ -1492,7 +1532,7 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
     <section id="up-renames">
       <h2>4. Renamed and removed methods</h2>
       <table>
-        <tr><th>2.x</th><th>3.0</th></tr>
+        <tr><th>1.x</th><th>2.0</th></tr>
         <tr><td><code>shouldHide($x)</code></td><td><code>hideWhen($x)</code></td></tr>
         <tr><td><code>shouldHideIfNo()</code></td><td><code>hideWhenEmpty()</code></td></tr>
         <tr><td><code>withoutLabels()</code></td><td><b>removed</b> &mdash; see below</td></tr>
@@ -1513,14 +1553,14 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
         it is worth being explicit.
       </p>
       <p>
-        <b>2.x <code>withoutLabels()</code></b> meant &ldquo;print the raw value
-        instead of a mapped label&rdquo;. In 3.0 that is simply the default: an
+        <b>1.x <code>withoutLabels()</code></b> meant &ldquo;print the raw value
+        instead of a mapped label&rdquo;. In 2.0 that is simply the default: an
         unmapped value falls back to itself. In almost every case you just delete
         the call, and the command does that for you when the file contains no
         <code>labels()</code> at all.
       </p>
       <p>
-        <b>3.0 <code>withoutLabel()</code></b>, singular, is a different feature:
+        <b>2.0 <code>withoutLabel()</code></b>, singular, is a different feature:
         render the mark with <b>no text at all</b>. Reach for it only if that is
         genuinely what you want.
       </p>
@@ -1528,7 +1568,7 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
         If the file also uses <code>labels()</code> anywhere, the command leaves
         <code>withoutLabels()</code> alone and flags it rather than guessing which
         chain it belongs to. Where it sat on a chain <em>with</em>
-        <code>labels()</code>, that combination was contradictory in 2.x &mdash;
+        <code>labels()</code>, that combination was contradictory in 1.x &mdash;
         the labels were ignored &mdash; so decide which one you meant.
       </p>
     </section>
@@ -1537,8 +1577,8 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
       <h2>6. A string is no longer a possible callback</h2>
       <div class="code">
         <div class="lab"><span>The one silent change</span></div>
-<pre><span class="c">// 2.x: is_callable('trim') was true, so trim() was INVOKED as the predicate.</span>
-<span class="c">// 3.0: 'trim' is a value, compared against the attribute.</span>
+<pre><span class="c">// 1.x: is_callable('trim') was true, so trim() was INVOKED as the predicate.</span>
+<span class="c">// 2.0: 'trim' is a value, compared against the attribute.</span>
 -&gt;<span class="f">hideWhen</span>(<span class="s">'trim'</span>)
 
 <span class="c">// If you wanted the callback:</span>
@@ -1548,7 +1588,7 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
         The command reports every <code>shouldHide()</code> whose argument names a
         real PHP function. Scalar comparison is otherwise unchanged: both sides
         are normalised first, so <code>0</code> still matches <code>'0'</code> the
-        way it did under 2.x&rsquo;s <code>==</code>.
+        way it did under 1.x&rsquo;s <code>==</code>.
       </p>
     </section>
 
@@ -1558,7 +1598,7 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
         It implements <code>Unfillable</code> and calls <code>exceptOnForms()</code>,
         so it is hidden on create, update, attach and update-attached &mdash; the
         last two of which the old <code>$showOnCreation</code>/<code>$showOnUpdate</code>
-        pair missed. The 2.x form component was registered and bundled but
+        pair missed. The 1.x form component was registered and bundled but
         unreachable and never wrote a value, so nothing can regress.
       </p>
       <div class="code">
@@ -1608,9 +1648,9 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
     <p class="lede">Mirrors <code>CHANGELOG.md</code> in the repository.</p>
 
     <section id="cl-req">
-      <h2>3.0.0 &mdash; requirements</h2>
+      <h2>2.0.0 &mdash; requirements</h2>
       <ul>
-        <li>Requires PHP 8.3+, Laravel 12 or 13, and Nova 5.7+ (Nova 6 is explicitly conflicted).</li>
+        <li>Requires PHP 8.3+, Laravel 12 or 13, and Nova 5.11+ (Nova 6 is explicitly conflicted).</li>
         <li>Dropped PHP 8.0&ndash;8.2 and Laravel 10 and 11.</li>
         <li><code>laravel/nova</code> is now a runtime requirement rather than a dev dependency.</li>
       </ul>
@@ -1647,12 +1687,12 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
     <section id="cl-changed">
       <h2>Changed</h2>
       <ul>
-        <li><b>Labels and colours are resolved on the server.</b> 2.x pushed the whole configuration into every row of an index; the payload now carries one resolved indicator per value.</li>
+        <li><b>Labels and colours are resolved on the server.</b> 1.x pushed the whole configuration into every row of an index; the payload now carries one resolved indicator per value.</li>
         <li>Colours resolve to Nova&rsquo;s own <code>--colors-*</code> variables. The built-in names now match the Tailwind 3 palette.</li>
         <li>The field is <code>Unfillable</code> and hidden on every form view.</li>
         <li>Vite 6 replaces Laravel Mix. Output paths are unchanged.</li>
         <li>The Vue component is now <code>nova-field-indicator</code>.</li>
-        <li>The bundle is 1.09&nbsp;kB gzipped, down from 1.4&nbsp;kB, despite the added features.</li>
+        <li>The bundle is 1.07&nbsp;kB gzipped, down from 1.4&nbsp;kB, despite the added features.</li>
       </ul>
     </section>
 
@@ -1669,6 +1709,121 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
 
     <div class="pager">
       <a href="#/upgrade"><span>Previous</span><b>Upgrading</b></a>
+      <a class="next" href="#/project"><span>Next</span><b>Project &amp; licence</b></a>
+    </div>
+  </div>
+  <aside class="onthispage" aria-label="On this page"><h4>On this page</h4><ol data-toc></ol></aside>
+ </div>
+</section>
+
+<!-- ══ PROJECT & LICENCE ═════════════════════════════════════════════ -->
+<section class="page hidden" id="project">
+ <div class="mx docs">
+  <aside class="sidenav" data-nav aria-label="Documentation"></aside>
+  <div class="body">
+    <h1>Project &amp; licence</h1>
+    <p class="lede">
+      How the package is built, what a pull request has to pass, who it is
+      derived from, and the licence in full.
+    </p>
+
+    <section id="pr-contributing">
+      <h2>Contributing</h2>
+      <p>
+        Nova is a commercial package, so a working checkout needs an
+        <code>auth.json</code> in the project root carrying your Nova
+        credentials. It is gitignored and <code>export-ignore</code>d, so it is
+        neither committed nor shipped in a distributed tarball.
+      </p>
+      <div class="code" style="margin-top:1.1rem">
+        <div class="lab"><span>getting started</span><button class="copybtn" type="button">Copy</button></div>
+<pre>composer install
+npm install</pre>
+      </div>
+      <p>
+        <code>dist/</code> is committed on purpose &mdash; the service provider
+        serves the built assets from there, so any change under
+        <code>resources/</code> must ship with a rebuilt bundle.
+      </p>
+    </section>
+
+    <section id="pr-suite">
+      <h2>What a pull request has to pass</h2>
+      <div class="code">
+        <div class="lab"><span>before opening a pull request</span><button class="copybtn" type="button">Copy</button></div>
+<pre>composer lint     <span class="c">// Pint + PHPStan level 6</span>
+composer test     <span class="c">// Pest</span>
+npm run test      <span class="c">// Vitest</span>
+npm run build     <span class="c">// rebuild dist/ and commit it</span></pre>
+      </div>
+      <p>
+        <code>composer check</code> runs the lint and the Pest suite together.
+        The suite is 164 Pest tests and 22 Vitest tests; new behaviour needs a
+        test of its own.
+      </p>
+    </section>
+
+    <section id="pr-conventions">
+      <h2>Conventions</h2>
+      <ul>
+        <li><b>PHP</b> &mdash; Pint (<code>laravel</code> preset, <code>declare(strict_types=1)</code>), PHPStan level 6.</li>
+        <li><b>JS and Vue</b> &mdash; Prettier, <code>&lt;script setup&gt;</code> SFCs.</li>
+        <li><b>The README carries no code samples.</b> They live on this site, in <code>docs/</code>, which is the single source for them. A sample added here is covered by the Pest suite that owns the behaviour.</li>
+        <li><b>Resolution stays framework-free.</b> Nothing under <code>src/Support</code>, <code>src/Results</code>, <code>src/Enums</code> or <code>src/Contracts</code> may reference <code>Laravel\Nova</code>; <code>tests/ArchTest.php</code> enforces it. That is what keeps the colour, enum and threshold logic unit-testable without booting an application.</li>
+        <li><b>Never interpolate a configured value into a class name or a style string.</b> Colours are validated in <code>Support\ColorResolver</code> and bound as a style object &mdash; see <a href="#/security">Security</a> for why.</li>
+      </ul>
+    </section>
+
+    <section id="pr-credits">
+      <h2>Credits</h2>
+      <ul>
+        <li><a href="https://github.com/oleghalin">Oleg Khalin</a> &mdash; the original <a href="https://github.com/oleghalin/nova4-indicator-field">nova4-indicator-field</a>, which this package began as.</li>
+        <li><a href="https://github.com/gabrielesbaiz">Gabriele Sbaiz</a> &mdash; the 2.0 rewrite and maintenance.</li>
+        <li><a href="https://github.com/gabrielesbaiz/nova-field-indicator/graphs/contributors">All contributors</a>.</li>
+      </ul>
+      <div class="note">
+        <b>Reporting something sensitive?</b> Security issues go to
+        <a href="mailto:gabriele@sbaiz.com">gabriele@sbaiz.com</a> rather than a
+        public issue. The threat model is on the <a href="#/security">Security</a> page.
+      </div>
+    </section>
+
+    <section id="pr-licence">
+      <h2>Licence</h2>
+      <p>
+        The package is MIT licensed and always will be. Sponsorship buys
+        maintenance time, not features. Nova itself is commercial and is not
+        covered by this licence &mdash; a Laravel Nova licence is sold
+        separately by Laravel.
+      </p>
+      <div class="code">
+        <div class="lab"><span>LICENSE.md</span><button class="copybtn" type="button">Copy</button></div>
+<pre>The MIT License (MIT)
+
+Copyright (c) Gabriele Sbaiz &lt;gabriele@sbaiz.com&gt;
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.</pre>
+      </div>
+    </section>
+
+    <div class="pager">
+      <a href="#/changelog"><span>Previous</span><b>Changelog</b></a>
       <a class="next" href="#/home"><span>Next</span><b>Home</b></a>
     </div>
   </div>
@@ -1702,14 +1857,14 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
         <ul>
           <li><a href="#/api">API reference</a></li>
           <li><a href="#/colors">Colours</a></li>
-          <li><a href="#/upgrade">Upgrading from 2.x</a></li>
+          <li><a href="#/upgrade">Upgrading from 1.x</a></li>
         </ul>
       </div>
       <div>
         <h4>Project</h4>
         <ul>
           <li><a href="#/security">Security policy</a></li>
-          <li><a href="https://github.com/gabrielesbaiz/nova-field-indicator/blob/main/CONTRIBUTING.md">Contributing</a></li>
+          <li><a href="#/project">Project &amp; licence</a></li>
           <li><a href="https://github.com/sponsors/gabrielesbaiz">Sponsor</a></li>
         </ul>
       </div>
@@ -1733,7 +1888,7 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
     ['Getting started', [['#/install','Installation'], ['#/configuration','Configuration']]],
     ['Usage',           [['#/guide','Guide'], ['#/colors','Colours']]],
     ['Reference',       [['#/api','API reference']]],
-    ['Project',         [['#/security','Security'], ['#/upgrade','Upgrading'], ['#/changelog','Changelog']]],
+    ['Project',         [['#/security','Security'], ['#/upgrade','Upgrading'], ['#/changelog','Changelog'], ['#/project','Project & licence']]],
   ];
 
   document.querySelectorAll('[data-nav]').forEach(host => {
@@ -1776,43 +1931,68 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
   addEventListener('resize', paintBar, { passive: true });
   paintBar();
 
-  /* ── the status board ──────────────────────────────────────────────────
-     Every cell is a real mark driven by --nfi-color, so the hero is the
-     package rendering itself rather than a picture of it. */
+  /* ── the live resource index ────────────────────────────────────────
+     A real Nova index, drawn with the same CSS the package ships. The
+     controls set the same options the PHP API exposes, and the call below
+     the panel is rewritten to match, so the hero is the package rendering
+     itself rather than a picture of it. */
   const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const board = document.getElementById('board');
-  const PAL = ['green-500','red-500','yellow-500','sky-500','violet-500','emerald-500','orange-500','pink-500','indigo-500'];
-  if (board) {
-    const CELLS = 18 * 7;
-    const cells = [];
-    for (let i = 0; i < CELLS; i++) {
-      const cell = document.createElement('i');
-      board.appendChild(cell);
-      cells.push(cell);
-    }
-    const light = cell => {
-      const token = PAL[(Math.random() * PAL.length) | 0];
-      cell.style.background = 'rgba(var(--colors-' + token + '))';
-      cell.classList.add('lit');
-    };
-    if (calm) {
-      /* Resolve straight to the finished state. */
-      cells.forEach((c, i) => { if (i % 3 === 0) light(c); });
-    } else {
-      /* A wave sweeps left to right, settling about a third of the grid. */
-      cells.forEach((cell, i) => {
-        const col = i % 18, row = (i / 18) | 0;
-        setTimeout(() => {
-          light(cell);
-          if (Math.random() > .36) {
-            setTimeout(() => {
-              cell.classList.remove('lit');
-              cell.style.background = '';
-            }, 900 + Math.random() * 1400);
-          }
-        }, 220 + col * 46 + row * 22 + Math.random() * 160);
-      });
-    }
+  const ROWS = [
+    ['Ada Lovelace', 'Active',  'green-500',  'green-400',  false],
+    ['Grace Hopper', 'Invited', 'sky-500',    'sky-400',    false],
+    ['Alan Turing',  'Banned',  'red-500',    'red-400',    false],
+    ['Katherine J.', 'Pending', 'yellow-500', 'yellow-300', false],
+    ['Margaret H.',  'Syncing', 'sky-400',    'sky-400',    true],
+  ];
+  const demo = { shape: 'dot', size: 'md', filtered: false };
+  const table = document.querySelector('#novatable tbody');
+  const ctl = document.getElementById('ctl');
+  const ctlcode = document.getElementById('ctlcode');
+  const filterBtn = document.getElementById('filterBtn');
+
+  const paintPanel = () => {
+    const rows = demo.filtered
+      ? ROWS.filter(r => r[1] === 'Active' || r[1] === 'Invited')
+      : ROWS;
+    table.innerHTML =
+      '<tr><th>Name</th><th>Status</th></tr>' +
+      rows.map(([name, label, light, dark, pulse]) =>
+        '<tr><td class="name">' + name + '</td><td>' +
+        '<span class="nfi' + (pulse && !calm ? ' nfi-pulse' : '') + '"' +
+        ' data-shape="' + demo.shape + '" data-size="' + demo.size + '"' +
+        ' style="--nfi-color:rgba(var(--colors-' + light + '));' +
+        '--nfi-color-dark:rgba(var(--colors-' + dark + '))">' +
+        /* A pill is its own mark, so it renders no separate glyph — the same
+           rule the Vue component follows. */
+        (demo.shape === 'pill' ? '' : '<span class="nfi-mark"></span>') +
+        '<span>' + label + '</span></span></td></tr>').join('');
+
+    const parts = ["<b>NovaFieldIndicator</b>::<b>make</b>('Status')", '-&gt;<b>enum</b>(<b>Status</b>::class)'];
+    if (demo.shape !== 'dot') parts.push('-&gt;<b>' + demo.shape + '</b>()');
+    if (demo.size !== 'md') parts.push("-&gt;<b>size</b>('" + demo.size + "')");
+    if (demo.filtered) parts.push('-&gt;<b>filterable</b>()');
+    ctlcode.innerHTML = parts.join('\n    ') + ',';
+  };
+
+  if (table) {
+    ctl.addEventListener('click', e => {
+      const b = e.target.closest('button[data-v]');
+      if (!b) return;
+      const group = b.closest('.ctlgroup').dataset.group;
+      demo[group] = b.dataset.v;
+      [...b.closest('.ctlgroup').querySelectorAll('button')]
+        .forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      paintPanel();
+    });
+
+    filterBtn.addEventListener('click', () => {
+      demo.filtered = !demo.filtered;
+      filterBtn.setAttribute('aria-pressed', String(demo.filtered));
+      filterBtn.textContent = demo.filtered ? 'Status: active, invited' : 'Status: all';
+      paintPanel();
+    });
+
+    paintPanel();
   }
 
   /* ── the colour tokens, rendered by the package's own CSS ──────────── */
@@ -1823,7 +2003,7 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
     ['info',    'sky-500',    'sky-400',    'was var(--info) — invisible on Nova 5'],
     ['primary', 'sky-500',    'sky-400',    "Nova's themeable alias"],
     ['gray',    'gray-400',   'gray-400',   'also spelled grey'],
-    ['grey',    'gray-400',   'gray-400',   'both spellings kept from 2.x'],
+    ['grey',    'gray-400',   'gray-400',   'both spellings kept from 1.x'],
     ['black',   'gray-900',   'gray-100',   'inverts rather than lightening'],
     ['white',   'gray-100',   'gray-100',   'shade-less in Nova’s palette'],
   ];

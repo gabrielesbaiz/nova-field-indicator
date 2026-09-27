@@ -18,7 +18,7 @@ it('looks a label up in the state table', function () {
 });
 
 /*
- * 2.x needed ->withoutLabels() to print the raw value. In 3.0 that is simply
+ * 1.x needed ->withoutLabels() to print the raw value. In 2.0 that is simply
  * the default — an unmapped value falls back to itself, as Nova's Badge does —
  * which is why the old method no longer exists.
  */

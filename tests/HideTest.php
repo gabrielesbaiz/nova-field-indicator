@@ -19,7 +19,7 @@ function indicatorFor(mixed $value, ?callable $configure = null): array
 }
 
 /*
- * The headline regression. 2.x tested is_callable() before treating the
+ * The headline regression. 1.x tested is_callable() before treating the
  * argument as a value, so ->shouldHide('trim') *invoked* trim() as the
  * predicate instead of comparing the string. hideWhen() dispatches on the
  * declared type, which makes that unrepresentable.
@@ -56,7 +56,7 @@ it('hides on any member of an array', function () {
 /*
  * Comparison is strict, but both sides are normalised first — so 0 and '0'
  * still collapse to the same key. Without that, adopting strict_comparison
- * would have silently stopped hiding rows that 2.x hid via ==.
+ * would have silently stopped hiding rows that 1.x hid via ==.
  */
 it('keeps loose-feeling scalar matching despite strict comparison', function () {
     expect(indicatorFor('0', fn ($f) => $f->hideWhen(0))['shouldHide'])->toBeTrue()

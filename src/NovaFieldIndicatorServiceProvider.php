@@ -26,7 +26,7 @@ class NovaFieldIndicatorServiceProvider extends ServiceProvider
     protected function registerAssets(): void
     {
         Nova::serving(function (): void {
-            // Handles are namespaced to the package. 2.x registered the very
+            // Handles are namespaced to the package. 1.x registered the very
             // generic `indicator`, which any other package could collide with.
             Nova::script('nova-field-indicator', __DIR__.'/../dist/js/field.js');
             Nova::style('nova-field-indicator', __DIR__.'/../dist/css/field.css');

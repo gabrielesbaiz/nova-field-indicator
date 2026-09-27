@@ -10,7 +10,7 @@ use Illuminate\Contracts\Support\Arrayable;
  * One fully resolved indicator, ready to serialize.
  *
  * Everything the browser needs and nothing it does not: no label map, no colour
- * map, no lookup. On a 50-row index 2.x re-sent the entire configuration per
+ * map, no lookup. On a 50-row index 1.x re-sent the entire configuration per
  * row; this object is what replaces it.
  *
  * @implements Arrayable<string, mixed>

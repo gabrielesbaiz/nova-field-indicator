@@ -132,7 +132,7 @@ it('removes the redundant form visibility properties', function () {
 });
 
 /*
- * The silent biter: 2.x invoked this string as a callback because it tested
+ * The silent biter: 1.x invoked this string as a callback because it tested
  * is_callable() first. It cannot be rewritten, only flagged.
  */
 it('flags a shouldHide string that names a PHP function', function () {

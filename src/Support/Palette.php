@@ -9,7 +9,7 @@ namespace Gabrielesbaiz\NovaFieldIndicator\Support;
  *
  * This is the one class that knows what vendor/laravel/nova/generators.js
  * produces. Everything else asks it rather than hard-coding a palette, which is
- * how the package avoids the frozen-Tailwind-v1 problem that 2.x had.
+ * how the package avoids the frozen-Tailwind-v1 problem that 1.x had.
  */
 final class Palette
 {

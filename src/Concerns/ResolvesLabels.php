@@ -10,7 +10,7 @@ use Gabrielesbaiz\NovaFieldIndicator\Support\State;
 /**
  * Label resolution, including the accessible name.
  *
- * Note there is no withoutLabels() here. In 2.x that method meant "print the
+ * Note there is no withoutLabels() here. In 1.x that method meant "print the
  * raw value instead of a mapped label", which is now simply the default: an
  * unmapped value falls back to itself, the same way Nova's Badge behaves. The
  * method people actually wanted — a mark with no text at all — is

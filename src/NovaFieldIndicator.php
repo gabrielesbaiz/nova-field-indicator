@@ -20,7 +20,7 @@ use Override;
  * resolveIndicatorFor() is the seam to override.
  *
  * Every lookup happens here on the server, once per value, and only the result
- * is serialized — see jsonSerialize(). 2.x pushed the whole label and colour
+ * is serialized — see jsonSerialize(). 1.x pushed the whole label and colour
  * configuration to the browser with every row, then looked it up again per
  * cell.
  *
@@ -46,7 +46,7 @@ class NovaFieldIndicator extends Field implements FilterableField, Unfillable
     /**
      * The field's Vue component.
      *
-     * Renamed from 2.x's very generic `indicator-field`, which risked
+     * Renamed from 1.x's very generic `indicator-field`, which risked
      * colliding with any other package that registered the same name.
      *
      * @var string
@@ -87,9 +87,14 @@ class NovaFieldIndicator extends Field implements FilterableField, Unfillable
      *
      * configureDefaults() rather than the constructor because that is the hook
      * Nova's own Badge uses, and it runs after the field's attribute is known.
-     * exceptOnForms() replaces 2.x's $showOnCreation/$showOnUpdate properties
+     * exceptOnForms() replaces 1.x's $showOnCreation/$showOnUpdate properties
      * and additionally covers the attach and update-attached views, which those
      * two properties missed.
+     *
+     * The hook lands in Nova 5.11, which is why composer.json requires ^5.11
+     * and conflicts anything below it. #[Override] is deliberate: on an older
+     * Nova the class fails to load, instead of loading fine, never running this
+     * method, and quietly showing the field on every form.
      */
     #[Override]
     protected function configureDefaults(): void
