@@ -34,7 +34,10 @@ it('exports real payloads for the JavaScript suite', function () {
     $field->value = 'a';
     $cases['hidden'] = $field->jsonSerialize();
 
-    $keep = ['indicators', 'shape', 'size', 'shouldHide', 'emptyText'];
+    // `value` belongs in the fixture even though the component never reads it.
+    // Leaving it out is what let the composable unwrap the field by reaching
+    // for `.value` — Nova's own resolved-attribute key — and still pass here.
+    $keep = ['value', 'indicators', 'shape', 'size', 'shouldHide', 'emptyText'];
     $cases = array_map(static fn (array $c): array => array_intersect_key($c, array_flip($keep)), $cases);
 
     file_put_contents(
@@ -43,4 +46,6 @@ it('exports real payloads for the JavaScript suite', function () {
     );
 
     expect($cases['enum']['indicators'][0]['label'])->toBe('Active');
+
+    expect($cases['enum'])->toHaveKey('value');
 });

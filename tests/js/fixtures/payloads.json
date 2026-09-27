@@ -1,5 +1,6 @@
 {
     "enum": {
+        "value": "active",
         "indicators": [
             {
                 "value": "active",
@@ -25,6 +26,7 @@
         "emptyText": "—"
     },
     "pill": {
+        "value": "a",
         "indicators": [
             {
                 "value": "a",
@@ -47,6 +49,10 @@
         "emptyText": "—"
     },
     "multi": {
+        "value": [
+            "x",
+            "y"
+        ],
         "indicators": [
             {
                 "value": "x",
@@ -83,6 +89,7 @@
         "emptyText": "—"
     },
     "nolabel": {
+        "value": "a",
         "indicators": [
             {
                 "value": "a",
@@ -105,6 +112,7 @@
         "emptyText": "—"
     },
     "hidden": {
+        "value": "a",
         "indicators": [],
         "shape": "dot",
         "size": "md",

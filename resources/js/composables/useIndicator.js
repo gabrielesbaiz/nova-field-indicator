@@ -1,4 +1,4 @@
-import { computed } from "vue";
+import { computed, unref } from "vue";
 
 /**
  * Turns the serialized field into everything the template needs.
@@ -7,19 +7,23 @@ import { computed } from "vue";
  * icons per value and sends the result, so this only shapes what it receives.
  */
 export function useIndicator(field) {
-    const indicators = computed(() => {
-        const value = field.value ?? field;
+    // unref(), not `field.value ?? field`. The serialized field carries its own
+    // `value` key — the resolved attribute, usually a string — so reaching for
+    // `.value` to unwrap a possible ref read that instead and every payload
+    // resolved to no indicators at all.
+    const payload = computed(() => unref(field));
 
-        if (value.shouldHide) {
+    const indicators = computed(() => {
+        if (payload.value.shouldHide) {
             return [];
         }
 
-        return value.indicators ?? [];
+        return payload.value.indicators ?? [];
     });
 
-    const shape = computed(() => (field.value ?? field).shape ?? "dot");
-    const size = computed(() => (field.value ?? field).size ?? "md");
-    const emptyText = computed(() => (field.value ?? field).emptyText ?? "—");
+    const shape = computed(() => payload.value.shape ?? "dot");
+    const size = computed(() => payload.value.size ?? "md");
+    const emptyText = computed(() => payload.value.emptyText ?? "—");
 
     /** Whether anything at all should render. */
     const hasIndicators = computed(() => indicators.value.length > 0);
