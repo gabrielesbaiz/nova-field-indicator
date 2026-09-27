@@ -4,8 +4,7 @@
 
 | Version | Supported |
 |---|---|
-| 3.x | ✅ |
-| 2.x | ❌ |
+| 2.x | ✅ |
 | 1.x | ❌ |
 
 ## Reporting a vulnerability
@@ -35,7 +34,7 @@ in an inline custom property:
   so an unparseable value is dropped by the browser rather than concatenated
   into a declaration string.
 
-This is a change from 2.x, which classified colours in the browser with an
+This is a change from 1.x, which classified colours in the browser with an
 unanchored regex and interpolated the result into a `background:${color};`
 string. That would have accepted `#fff; background-image:url(//example.com)`.
 

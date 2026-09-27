@@ -10,7 +10,7 @@ use Illuminate\Contracts\Support\Arrayable;
  * A colour after resolution: finished CSS values, ready to become inline custom
  * properties.
  *
- * The client never inspects these strings. That is the point — 2.x classified
+ * The client never inspects these strings. That is the point — 1.x classified
  * colours in the Vue component with an unanchored regex, which both duplicated
  * the palette on the wire and let a crafted literal escape into an inline
  * style. Classification now happens once, server-side, in ColorResolver.

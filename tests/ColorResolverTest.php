@@ -8,7 +8,7 @@ use Gabrielesbaiz\NovaFieldIndicator\Support\ColorResolver;
 use Gabrielesbaiz\NovaFieldIndicator\Support\Palette;
 
 /*
- * The four tokens below are the reason 3.0 exists. In 2.x they were styled as
+ * The four tokens below are the reason 2.0 exists. In 1.x they were styled as
  * var(--success) and friends, which Nova 5 does not define, so the dot painted
  * with an invalid colour and rendered invisible.
  */
@@ -139,7 +139,7 @@ it('accepts every supported literal colour form', function (string $literal) {
 /*
  * The resolved value is applied as an inline custom property, so a literal that
  * could close a declaration or smuggle a url() must never survive this class.
- * 2.x classified colours in the Vue component with an unanchored regex, which
+ * 1.x classified colours in the Vue component with an unanchored regex, which
  * would have passed most of these straight through into a style attribute.
  */
 it('rejects CSS injection payloads', function (string $payload) {

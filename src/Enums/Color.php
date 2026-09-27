@@ -11,7 +11,7 @@ namespace Gabrielesbaiz\NovaFieldIndicator\Enums;
  * holding an "r, g, b" body (see vendor/laravel/nova/generators.js), which is
  * why a token resolves to a family plus two shades rather than to a hex.
  *
- * This enum is where the headline 2.x bug is fixed. `success`, `danger`,
+ * This enum is where the headline 1.x bug is fixed. `success`, `danger`,
  * `warning` and `info` used to be styled as `var(--success)` and friends —
  * variables that existed in Nova 3/4 and do **not** exist in Nova 5, so those
  * four dots painted with an invalid colour and rendered invisible. They now
@@ -23,14 +23,14 @@ namespace Gabrielesbaiz\NovaFieldIndicator\Enums;
  */
 enum Color: string
 {
-    // Semantic tokens. These four were the broken ones in 2.x.
+    // Semantic tokens. These four were the broken ones in 1.x.
     case Primary = 'primary';
     case Success = 'success';
     case Danger = 'danger';
     case Warning = 'warning';
     case Info = 'info';
 
-    // Neutrals. Both spellings of grey are cases so 2.x configuration keeps working.
+    // Neutrals. Both spellings of grey are cases so 1.x configuration keeps working.
     //
     // Plain palette families (red, emerald, slate, ...) are deliberately NOT
     // cases. They are resolved as families instead, which is what lets the

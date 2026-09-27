@@ -15,8 +15,8 @@ function payload(mixed $value, ?callable $configure = null): array
 }
 
 /*
- * The efficiency fix. 2.x pushed the whole labels and colors configuration into
- * every row's payload and looked it up again in the browser; 3.0 sends one
+ * The efficiency fix. 1.x pushed the whole labels and colors configuration into
+ * every row's payload and looked it up again in the browser; 2.0 sends one
  * resolved object and nothing else.
  */
 it('never ships the configuration maps to the client', function () {

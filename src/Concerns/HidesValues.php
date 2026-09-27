@@ -11,7 +11,7 @@ use Gabrielesbaiz\NovaFieldIndicator\Support\ValueNormalizer;
 /**
  * Conditional visibility: render nothing for certain values.
  *
- * Replaces 2.x's shouldHide()/shouldHideIfNo(). The rename is not cosmetic —
+ * Replaces 1.x's shouldHide()/shouldHideIfNo(). The rename is not cosmetic —
  * the old implementation tested is_callable() before treating the argument as a
  * value, so ->shouldHide('count') silently *invoked* count() as the predicate
  * instead of comparing against the string "count". Dispatching on the declared
@@ -69,7 +69,7 @@ trait HidesValues
             $candidates = array_map(ValueNormalizer::key(...), $this->hideWhen);
 
             // Strict, but only because both sides were normalised first: 0 and
-            // '0' collapse to the same key, so this stays as forgiving as 2.x's
+            // '0' collapse to the same key, so this stays as forgiving as 1.x's
             // loose comparison without its surprises.
             return in_array($key, $candidates, true);
         }

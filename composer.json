@@ -25,7 +25,7 @@
         "php": "^8.3",
         "illuminate/contracts": "^12.0|^13.0",
         "illuminate/support": "^12.0|^13.0",
-        "laravel/nova": "^5.7"
+        "laravel/nova": "^5.11"
     },
     "require-dev": {
         "larastan/larastan": "^3.1",
@@ -86,6 +86,6 @@
         }
     },
     "conflict": {
-        "laravel/nova": "<5.7.0|>=6.0.0"
+        "laravel/nova": "<5.11.0|>=6.0.0"
     }
 }

@@ -2,14 +2,18 @@
 
 All notable changes to `nova-field-indicator` will be documented in this file.
 
-## 3.0.0 - 2026-09-25
+## 2.0.0 - 2026-09-25
 
 A full rewrite. See [UPGRADE.md](UPGRADE.md) before upgrading — and run
 `php artisan nova-field-indicator:upgrade` to migrate your call sites.
 
 ### Requirements
 
-- Requires PHP 8.3+, Laravel 12 or 13, and Nova 5.7+ (Nova 6 is explicitly conflicted).
+- Requires PHP 8.3+, Laravel 12 or 13, and Nova 5.11+ (Nova 6 is explicitly conflicted).
+  The floor is 5.11 rather than 5.7 because `Field::configureDefaults()` — the hook the
+  field applies `exceptOnForms()` and the `inline` default through — arrives in 5.11. The
+  method carries `#[Override]`, so an older Nova fails loudly when the class is loaded
+  rather than silently rendering the field on forms.
 - Dropped PHP 8.0–8.2 and Laravel 10 and 11.
 - `laravel/nova` is now a runtime requirement rather than a dev dependency.
 
@@ -23,10 +27,10 @@ A full rewrite. See [UPGRADE.md](UPGRADE.md) before upgrading — and run
   string, because `is_callable()` was tested before the value branch. `hideWhen()`
   dispatches on the declared type, so a string is always data.
 - Colour literals are now validated server-side against an anchored allow-list before
-  they reach an inline style. The 2.x client-side regex was unanchored and would have
+  they reach an inline style. The 1.x client-side regex was unanchored and would have
   passed `#fff; background-image:url(…)` straight through.
 - `whitespace-no-wrap` was Tailwind v1 syntax and had done nothing since Nova 4.
-- The neutral colour no longer depends on stylesheet source order: 2.x always emitted
+- The neutral colour no longer depends on stylesheet source order: 1.x always emitted
   an `indicator-grey` class alongside the real one and relied on declaration order to
   pick the winner.
 - Dark mode is supported at all, for the first time.
@@ -51,12 +55,12 @@ A full rewrite. See [UPGRADE.md](UPGRADE.md) before upgrading — and run
 - A publishable config file, including a `colors.tokens` table for rebranding a token
   once rather than at every call site.
 - English and Italian translations.
-- `php artisan nova-field-indicator:upgrade` to migrate from 2.x.
+- `php artisan nova-field-indicator:upgrade` to migrate from 1.x.
 - Real test coverage: 164 Pest tests and 22 Vitest tests, PHPStan level 6.
 
 ### Changed
 
-- **Labels and colours are resolved on the server.** 2.x pushed the whole configuration
+- **Labels and colours are resolved on the server.** 1.x pushed the whole configuration
   into every row of an index and looked it up again in the browser; the payload now
   carries one resolved indicator per value.
 - Colours resolve to Nova's own `--colors-<family>-<shade>` variables, so re-theming
@@ -65,7 +69,7 @@ A full rewrite. See [UPGRADE.md](UPGRADE.md) before upgrading — and run
   update-attached, which the old `$showOnCreation`/`$showOnUpdate` pair missed.
 - Vite 6 replaces Laravel Mix. Output paths are unchanged.
 - The Vue component is now `nova-field-indicator`.
-- The bundle is 1.09 kB gzipped, down from 1.4 kB, despite the added features.
+- The bundle is 1.07 kB gzipped, down from 1.4 kB, despite the added features.
 
 ### Removed
 

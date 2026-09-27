@@ -24,7 +24,7 @@ Every method, every config key, and a live palette page where picking a shape,
 size and shade rewrites the PHP call as you click it.
 
 > [!CAUTION]
-> **Upgrading from 2.x?** Read [UPGRADE.md](UPGRADE.md) first. On Nova 5 the
+> **Upgrading from 1.x?** Read [UPGRADE.md](UPGRADE.md) first. On Nova 5 the
 > `success`, `danger`, `warning` and `info` colours rendered an **invisible**
 > dot — they now appear, so columns that looked empty will fill with colour.
 > Named colours also move from the Tailwind v1 palette to Tailwind 3.
@@ -55,13 +55,14 @@ still reads correctly in dark mode and to a screen reader.
   mark is still a named graphic.
 - **Resolved on the server**, so an index ships one small object per row instead of
   your entire configuration repeated per cell.
-- **1.09 kB of JavaScript** gzipped, with no runtime dependency of its own.
+- **1.07 kB of JavaScript** gzipped, with no runtime dependency of its own.
 
 ## Requirements
 
 - PHP 8.3+
 - Laravel 12 or 13
-- Nova 5.7+ — Nova 6 is explicitly conflicted
+- Nova 5.11+ — Nova 6 is explicitly conflicted; `configureDefaults()`, the
+  hook the field applies its display-only defaults through, arrived in 5.11
 
 ## Installation
 

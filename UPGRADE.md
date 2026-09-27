@@ -1,21 +1,21 @@
 # Upgrade guide
 
-## 2.x → 3.0
+## 1.x → 2.0
 
 ### Requirements
 
-| | 2.x | 3.0 |
+| | 1.x | 2.0 |
 |---|---|---|
 | PHP | ^8.0 | ^8.3 |
 | Laravel | 10, 11, 12 | 12, 13 |
-| Nova | ^5.0 | ^5.7 (`<6.0`) |
+| Nova | ^4.0 | ^5.11 (`<6.0`) |
 
 `laravel/nova` is now a runtime requirement rather than a dev dependency.
 
 ### Start here
 
 ```bash
-composer require gabrielesbaiz/nova-field-indicator:^3.0
+composer require gabrielesbaiz/nova-field-indicator:^2.0
 php artisan nova-field-indicator:upgrade --dry-run
 ```
 
@@ -34,9 +34,9 @@ bite silently.
 
 ### 1. Four colours were invisible and now appear
 
-This is the reason 3.0 exists, and it is a fix that reads as a change.
+This is the reason 2.0 exists, and it is a fix that reads as a change.
 
-In 2.x, `success`, `danger`, `warning` and `info` were styled as
+In 1.x, `success`, `danger`, `warning` and `info` were styled as
 `var(--success)`, `var(--danger)` and so on. Those CSS variables existed in
 Nova 3 and 4. **Nova 5 does not define them**, so the mark painted with an
 invalid colour and rendered completely transparent.
@@ -50,17 +50,17 @@ NovaFieldIndicator::make('Status')->colors([
 ])
 ```
 
-…then on Nova 5 that column has been blank. In 3.0 those dots appear, in green
+…then on Nova 5 that column has been blank. In 2.0 those dots appear, in green
 and red. Nothing is wrong — you are seeing the field work for the first time.
 
 There is no opt-out, and there should not be one.
 
 ### 2. Every named colour shifts hue
 
-2.x hard-coded the **Tailwind v1** palette. 3.0 resolves to Nova's own palette
+1.x hard-coded the **Tailwind v1** palette. 2.0 resolves to Nova's own palette
 variables, which are Tailwind 3.
 
-| Name | 2.x | 3.0 | Change |
+| Name | 1.x | 2.0 | Change |
 |---|---|---|---|
 | `grey` / `gray` | `#B8C2CC` | `gray-400` | cooler, darker |
 | `black` | `#22292F` | `gray-900` | darker |
@@ -97,7 +97,7 @@ Or pin it once, for the whole application, in the published config:
 
 ### 3. Custom `.indicator-*` CSS no longer applies
 
-2.x invited this, because colours were class names:
+1.x invited this, because colours were class names:
 
 ```css
 /* your Nova stylesheet */
@@ -108,7 +108,7 @@ Or pin it once, for the whole application, in the published config:
 ->colors(['active' => 'brand'])
 ```
 
-3.0 emits no `indicator-*` class at all — colour arrives as an inline custom
+2.0 emits no `indicator-*` class at all — colour arrives as an inline custom
 property — so those rules are dead and the value falls back to neutral grey.
 
 This is the sharpest real break in the release. It is deliberate: keeping a
@@ -123,7 +123,7 @@ being removed. Migrate in one line:
 
 ### 4. Renamed and removed methods
 
-| 2.x | 3.0 |
+| 1.x | 2.0 |
 |---|---|
 | `->shouldHide($x)` | `->hideWhen($x)` |
 | `->shouldHideIfNo()` | `->hideWhenEmpty()` |
@@ -139,19 +139,19 @@ There are no deprecation shims. A missed call site raises
 The names are one character apart and the meanings are nearly opposite, so it
 is worth being explicit.
 
-**2.x `withoutLabels()`** meant *"print the raw value instead of a mapped
-label"*. In 3.0 that is simply the default: an unmapped value falls back to
+**1.x `withoutLabels()`** meant *"print the raw value instead of a mapped
+label"*. In 2.0 that is simply the default: an unmapped value falls back to
 itself, exactly as Nova's own `Badge` behaves. So in almost every case you just
 delete the call, and the upgrade command does that for you when the file
 contains no `->labels()` at all.
 
-**3.0 `withoutLabel()`**, singular, is a different feature: render the mark with
+**2.0 `withoutLabel()`**, singular, is a different feature: render the mark with
 **no text at all**. Reach for it only if that is genuinely what you want.
 
 If the file also uses `->labels()` anywhere, the command leaves
 `->withoutLabels()` alone and flags it instead of guessing which chain it
 belongs to. Delete it by hand where it was a no-op; where it sat on a chain
-with `->labels()`, that combination was contradictory in 2.x — the labels were
+with `->labels()`, that combination was contradictory in 1.x — the labels were
 ignored — so decide which one you meant.
 
 ### 6. Value comparison is stricter, in one specific way
@@ -159,8 +159,8 @@ ignored — so decide which one you meant.
 `hideWhen()` no longer treats a string argument as a possible callback:
 
 ```php
-// 2.x: is_callable('trim') was true, so trim() was INVOKED as the predicate.
-// 3.0: 'trim' is a value, compared against the attribute.
+// 1.x: is_callable('trim') was true, so trim() was INVOKED as the predicate.
+// 2.0: 'trim' is a value, compared against the attribute.
 ->hideWhen('trim')
 ```
 
@@ -172,12 +172,12 @@ function. If you were relying on the old behaviour, pass a closure:
 ```
 
 Scalar comparison is otherwise unchanged. Both sides are normalised before
-comparison, so `0` still matches `'0'` the way it did under 2.x's `==`.
+comparison, so `0` still matches `'0'` the way it did under 1.x's `==`.
 
 ### 7. The field is read-only on forms
 
 It now implements `Unfillable` and calls `exceptOnForms()`, so it is hidden on
-create, update, attach and update-attached. The 2.x form component was
+create, update, attach and update-attached. The 1.x form component was
 registered and bundled but unreachable, and never wrote a value, so nothing can
 regress here — but if you forced it on with `->showOnCreating()`, you now get
 nothing at all.
@@ -195,10 +195,10 @@ Only relevant if you read the serialized field from the API or wrote your own
 Vue override.
 
 ```jsonc
-// 2.x — the whole configuration, repeated on every row
+// 1.x — the whole configuration, repeated on every row
 { "labels": {...}, "colors": {...}, "unknownLabel": "…", "withoutLabels": false, "shouldHide": false }
 
-// 3.0 — one resolved indicator per value
+// 2.0 — one resolved indicator per value
 { "indicators": [{ "value": "active", "label": "Active", "ariaLabel": "Active",
                    "color": { "light": "…", "dark": "…", "soft": "…" },
                    "icon": null, "tooltip": null, "pulse": false }],
@@ -219,7 +219,7 @@ it is the documented seam, and it receives the normalised value key.
 
 ---
 
-## New in 3.0
+## New in 2.0
 
 ```php
 // One enum instead of three parallel arrays.

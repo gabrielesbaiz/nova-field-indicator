@@ -11,9 +11,9 @@ use SplFileInfo;
 use Throwable;
 
 /**
- * Migrates resources from the 2.x API to 3.0.
+ * Migrates resources from the 1.x API to 3.0.
  *
- * 3.0 is a clean break with no deprecation shims, so this command is the
+ * 2.0 is a clean break with no deprecation shims, so this command is the
  * migration path. It rewrites what can be rewritten mechanically and reports
  * everything that needs a human, rather than guessing.
  *
@@ -27,10 +27,10 @@ class UpgradeCommand extends Command
                             {--path=app/Nova : Directory to scan for NovaFieldIndicator usage}
                             {--dry-run : Report what would change without writing}';
 
-    protected $description = 'Migrate NovaFieldIndicator usage from 2.x to the 3.0 API';
+    protected $description = 'Migrate NovaFieldIndicator usage from 1.x to the 2.0 API';
 
     /**
-     * Tailwind v1 hexes from the 2.x stylesheet, mapped to 3.0 tokens.
+     * Tailwind v1 hexes from the 1.x stylesheet, mapped to 2.0 tokens.
      *
      * @var array<string, string>
      */
@@ -196,7 +196,7 @@ class UpgradeCommand extends Command
                 continue;
             }
 
-            // The silent biter: 2.x tested is_callable() first, so a string
+            // The silent biter: 1.x tested is_callable() first, so a string
             // naming a function was invoked rather than compared.
             if (preg_match('/^([\'"])([A-Za-z_][A-Za-z0-9_]*)\1$/', $trimmed, $m) === 1 && function_exists($m[2])) {
                 $reports['callable'][] = sprintf('%s — ->shouldHide(%s)', $relative, $trimmed);
@@ -324,7 +324,7 @@ class UpgradeCommand extends Command
     protected function report(array $reports): int
     {
         $sections = [
-            'callable' => 'Behaviour changed — 2.x INVOKED this string as a callback, 3.0 compares it as a value',
+            'callable' => 'Behaviour changed — 1.x INVOKED this string as a callback, 2.0 compares it as a value',
             'strict' => 'Comparison tightened — verify these still hide the rows you expect',
             'ambiguous' => 'Ambiguous argument — a callable array, or a list of values?',
             'contradictory' => 'withoutLabels() left in place because the file also uses labels() — remove it by hand',

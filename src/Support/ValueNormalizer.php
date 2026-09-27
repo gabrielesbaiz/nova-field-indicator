@@ -14,7 +14,7 @@ use UnitEnum;
  * Reduces an attribute value to a lookup key.
  *
  * This is what lets the package use strict comparison everywhere without the
- * behaviour regression that would normally imply. 2.x compared with `==` and
+ * behaviour regression that would normally imply. 1.x compared with `==` and
  * `in_array(..., false)`, so `0` matched `'0'`; switching to `===` alone would
  * silently stop hiding rows that used to disappear. Normalising both sides
  * first keeps the comparison forgiving for scalars while staying strict.
@@ -102,7 +102,7 @@ final class ValueNormalizer
     /**
      * Whether a value counts as "empty" for hideWhenEmpty().
      *
-     * Mirrors 2.x's `! $value` so an upgrade does not change which rows vanish.
+     * Mirrors 1.x's `! $value` so an upgrade does not change which rows vanish.
      */
     public static function isEmpty(mixed $value): bool
     {
