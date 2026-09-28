@@ -142,7 +142,7 @@ trait ResolvesLabels
     protected function translate(string $label): string
     {
         $enabled = $this->translateLabels
-            ?? (bool) config('nova-field-indicator.labels.translate', true);
+            ?? (bool) $this->setting('labels', 'translate', true);
 
         if (! $enabled) {
             return $label;

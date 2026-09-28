@@ -33,6 +33,7 @@ class NovaFieldIndicator extends Field implements FilterableField, Unfillable
     use Concerns\HasAppearance;
     use Concerns\HasStates;
     use Concerns\HidesValues;
+    use Concerns\ReadsConfiguration;
     use Concerns\ResolvesColors;
     use Concerns\ResolvesIcons;
     use Concerns\ResolvesLabels;
@@ -59,6 +60,15 @@ class NovaFieldIndicator extends Field implements FilterableField, Unfillable
     public $textAlign = 'left';
 
     /**
+     * The matched range band, memoized for the row being serialized.
+     *
+     * `false` is the "not looked up yet" marker, since `null` is a real answer
+     * — the value fell outside every band, or ->ranges() is not in use. Nova
+     * builds a new field per row, so the memo cannot outlive one value.
+     */
+    private State|null|false $rangeState = false;
+
+    /**
      * Prepare the element for JSON serialization.
      *
      * @return array<string, mixed>
@@ -78,7 +88,7 @@ class NovaFieldIndicator extends Field implements FilterableField, Unfillable
             'shape' => $this->resolvedShape()->value,
             'size' => $this->resolvedSize()->value,
             'shouldHide' => $hidden,
-            'emptyText' => (string) config('nova-field-indicator.labels.empty', '—'),
+            'emptyText' => (string) $this->setting('labels', 'empty', '—'),
         ]);
     }
 
@@ -105,7 +115,7 @@ class NovaFieldIndicator extends Field implements FilterableField, Unfillable
 
         // Nova declares $inline itself and serializes it, so the package
         // default is applied to its property rather than shadowing it.
-        $this->inline = (bool) config('nova-field-indicator.appearance.inline', true);
+        $this->inline = (bool) $this->setting('appearance', 'inline', true);
     }
 
     /**
@@ -116,6 +126,8 @@ class NovaFieldIndicator extends Field implements FilterableField, Unfillable
      */
     protected function resolveIndicatorFor(string|int|null $key, mixed $resource): Indicator
     {
+        // Matched once and passed down. resolveColorFor() used to run the
+        // threshold scan a second time for the same value.
         $state = $this->stateFor($key) ?? $this->rangeStateFor();
         $color = $this->resolveColorFor($key, $state, $resource);
 
@@ -143,10 +155,11 @@ class NovaFieldIndicator extends Field implements FilterableField, Unfillable
             $keys = [null];
         }
 
-        return array_values(array_map(
+        // $keys is already a list, so array_map returns one — no array_values.
+        return array_map(
             fn (string|int|null $key): array => $this->resolveIndicatorFor($key, $this->resource)->toArray(),
             $keys,
-        ));
+        );
     }
 
     /**
@@ -154,6 +167,10 @@ class NovaFieldIndicator extends Field implements FilterableField, Unfillable
      */
     protected function rangeStateFor(): ?State
     {
-        return $this->ranges?->match($this->value);
+        if ($this->rangeState !== false) {
+            return $this->rangeState;
+        }
+
+        return $this->rangeState = $this->ranges?->match($this->value);
     }
 }

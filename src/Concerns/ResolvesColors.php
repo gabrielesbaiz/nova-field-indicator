@@ -80,10 +80,11 @@ trait ResolvesColors
             return $resolver->resolve($state->color, $this->fallbackColor());
         }
 
-        if ($rangeState = $this->ranges?->match($this->value)) {
-            if ($rangeState->color !== null) {
-                return $resolver->resolve($rangeState->color, $this->fallbackColor());
-            }
+        // A hand-written state can carry a label but no colour, and still want
+        // the range band's colour underneath it — so this stays. The scan is
+        // memoized, so asking twice for the same value costs one match.
+        if (($rangeState = $this->rangeStateFor())?->color !== null) {
+            return $resolver->resolve($rangeState->color, $this->fallbackColor());
         }
 
         return $resolver->resolve($this->defaultColor, $this->fallbackColor());
@@ -91,7 +92,7 @@ trait ResolvesColors
 
     protected function fallbackColor(): Color
     {
-        $configured = config('nova-field-indicator.colors.default', 'gray');
+        $configured = $this->setting('colors', 'default', 'gray');
 
         return is_string($configured)
             ? (Color::tryFrom($configured) ?? Color::Gray)
@@ -105,10 +106,10 @@ trait ResolvesColors
         }
 
         /** @var array<string, mixed> $tokens */
-        $tokens = config('nova-field-indicator.colors.tokens', []);
+        $tokens = $this->setting('colors', 'tokens', []);
 
         /** @var array{light?: int, dark?: int} $shades */
-        $shades = config('nova-field-indicator.colors.shades', ['light' => 500, 'dark' => 400]);
+        $shades = $this->setting('colors', 'shades', ['light' => 500, 'dark' => 400]);
 
         return $this->colorResolver = new ColorResolver(
             tokens: is_array($tokens) ? $tokens : [],
@@ -116,7 +117,7 @@ trait ResolvesColors
                 'light' => (int) ($shades['light'] ?? 500),
                 'dark' => (int) ($shades['dark'] ?? 400),
             ],
-            softAlpha: (int) config('nova-field-indicator.colors.soft_alpha', 15),
+            softAlpha: (int) $this->setting('colors', 'soft_alpha', 15),
         );
     }
 }

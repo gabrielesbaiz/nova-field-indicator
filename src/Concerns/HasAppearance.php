@@ -119,7 +119,7 @@ trait HasAppearance
             return $this->shape;
         }
 
-        $configured = config('nova-field-indicator.appearance.shape', 'dot');
+        $configured = $this->setting('appearance', 'shape', 'dot');
 
         return is_string($configured) ? (Shape::tryFrom($configured) ?? Shape::Dot) : Shape::Dot;
     }
@@ -130,7 +130,7 @@ trait HasAppearance
             return $this->size;
         }
 
-        $configured = config('nova-field-indicator.appearance.size', 'md');
+        $configured = $this->setting('appearance', 'size', 'md');
 
         return is_string($configured) ? (Size::tryFrom($configured) ?? Size::Medium) : Size::Medium;
     }

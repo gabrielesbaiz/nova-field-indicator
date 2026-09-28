@@ -374,7 +374,7 @@ h1,h2,h3{letter-spacing:-.03em}
 
 <header class="top">
   <div class="mx in">
-    <a class="brand" href="#/home"><span class="bdot" aria-hidden="true"></span>NovaField Indicator <span class="ver">v2.0.0</span></a>
+    <a class="brand" href="#/home"><span class="bdot" aria-hidden="true"></span>NovaField Indicator <span class="ver">v2.0.1</span></a>
     <nav id="nav">
       <a href="#/install">Install</a>
       <a href="#/guide">Guide</a>
@@ -1663,6 +1663,24 @@ php artisan nova-field-indicator:upgrade --dry-run</pre>
   <div class="body">
     <h1>Changelog</h1>
     <p class="lede">Mirrors <code>CHANGELOG.md</code> in the repository.</p>
+
+    <section id="cl-201">
+      <h2>2.0.1 &mdash; performance</h2>
+      <p>
+        Serializing a row is about <b>28% faster</b>: 0.086&nbsp;ms &rarr;
+        0.062&nbsp;ms per row for a four-state <code>states()</code> table, and
+        0.075&nbsp;ms &rarr; 0.054&nbsp;ms for <code>-&gt;enum()</code> (minimum
+        of five runs, PHP 8.4, 2000 rows each). The API and the payload are
+        unchanged.
+      </p>
+      <ul>
+        <li><b>One configuration read per field instead of eleven.</b> Nova rebuilds the field for every row, so a 50-row index with three indicator columns was making over 1,600 container lookups for values that cannot change between rows.</li>
+        <li><b>The token map is lowered once</b>, in the resolver&rsquo;s constructor, rather than rebuilt inside both the membership test and the read on every colour.</li>
+        <li><b>Family and shade membership are hash lookups</b>, not scans over 23 families and 11 shades.</li>
+        <li><b><code>-&gt;ranges()</code> is matched once per value</b>, not twice.</li>
+        <li>Numeric state keys use <code>ctype_digit()</code> rather than a regex, and colours are memoized per value within a field.</li>
+      </ul>
+    </section>
 
     <section id="cl-req">
       <h2>2.0.0 &mdash; requirements</h2>

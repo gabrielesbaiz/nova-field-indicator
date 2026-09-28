@@ -2,6 +2,29 @@
 
 All notable changes to `nova-field-indicator` will be documented in this file.
 
+## 2.0.1 - 2026-09-28
+
+### Performance
+
+Serializing a row is about **28% faster** — 0.086 ms to 0.062 ms per row for a
+four-state `states()` table, 0.075 ms to 0.054 ms for `->enum()` (minimum of five
+runs, PHP 8.4, 2000 rows per run). Nothing about the API or the payload changed.
+
+- **One configuration read per field instead of eleven.** Shape, size, inline,
+  empty label, default colour, token table, shades, soft alpha, icon switch, icon
+  type and icon defaults each called `config()`, and Nova rebuilds the field for
+  every row — a 50-row index with three indicator columns made over 1,600 container
+  lookups. The package namespace is read once per field now.
+- **The application token map is lowered once**, in the resolver's constructor.
+  It was being rebuilt with `array_change_key_case()` inside both the membership
+  test and the read, on every colour resolved.
+- **Colour family and shade membership are hash lookups**, not linear scans over
+  23 families and 11 shades.
+- **`->ranges()` is matched once per value**, not twice. The band is resolved for
+  the state and reused for the colour.
+- Numeric state keys are detected with `ctype_digit()` rather than a regex, and
+  the resolver memoizes colours per value within a field.
+
 ## 2.0.0 - 2026-09-25
 
 A full rewrite. See [UPGRADE.md](UPGRADE.md) before upgrading — and run

@@ -91,7 +91,7 @@ trait ResolvesIcons
 
     protected function iconsEnabled(): bool
     {
-        return $this->withIcons ?? (bool) config('nova-field-indicator.icons.enabled', false);
+        return $this->withIcons ?? (bool) $this->setting('icons', 'enabled', false);
     }
 
     protected function resolvedIconType(): IconType
@@ -100,7 +100,7 @@ trait ResolvesIcons
             return $this->iconType;
         }
 
-        $configured = config('nova-field-indicator.icons.type', 'solid');
+        $configured = $this->setting('icons', 'type', 'solid');
 
         return is_string($configured)
             ? (IconType::tryFrom($configured) ?? IconType::Solid)
@@ -110,7 +110,7 @@ trait ResolvesIcons
     protected function configuredIconFor(string $token): ?string
     {
         /** @var array<string, string> $defaults */
-        $defaults = config('nova-field-indicator.icons.defaults', []);
+        $defaults = $this->setting('icons', 'defaults', []);
 
         return is_array($defaults) && isset($defaults[$token]) ? (string) $defaults[$token] : null;
     }

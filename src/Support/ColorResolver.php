@@ -38,6 +38,29 @@ final class ColorResolver
     private const MAX_LITERAL_LENGTH = 64;
 
     /**
+     * Application tokens, keys already lowered.
+     *
+     * Lowered once here rather than on every lookup: the old code ran
+     * array_change_key_case() inside both the membership test and the read,
+     * so a 50-row index rebuilt the whole map a hundred times.
+     *
+     * @var array<string, mixed>
+     */
+    private array $loweredTokens;
+
+    /**
+     * Resolved colours, keyed by the scalar input and the fallback.
+     *
+     * A status column has a handful of distinct values and hundreds of rows;
+     * without this the same four tokens are parsed, matched and formatted once
+     * per row. Only scalar inputs are memoized — an array pair is cheap to
+     * rebuild and a Closure result is not ours to cache.
+     *
+     * @var array<string, ResolvedColor>
+     */
+    private array $memo = [];
+
+    /**
      * @param  array<string, mixed>  $tokens  Application tokens from config.
      * @param  array{light: int, dark: int}  $shades  Default shades for a bare family.
      */
@@ -45,7 +68,9 @@ final class ColorResolver
         private array $tokens = [],
         private array $shades = ['light' => 500, 'dark' => 400],
         private int $softAlpha = 15,
-    ) {}
+    ) {
+        $this->loweredTokens = array_change_key_case($tokens, CASE_LOWER);
+    }
 
     /**
      * @param  Color|string|array<string, mixed>|null  $color
@@ -54,6 +79,32 @@ final class ColorResolver
     {
         $fallback ??= Color::Gray;
 
+        if (is_string($color) && $color !== '') {
+            $key = $color."\0".$fallback->value;
+
+            return $this->memo[$key] ??= $this->resolveUncached($color, $fallback);
+        }
+
+        return $this->resolveUncached($color, $fallback);
+    }
+
+    public function fromToken(Color $token): ResolvedColor
+    {
+        $family = $token->family();
+
+        return new ResolvedColor(
+            light: Palette::cssValue($family, $token->lightShade()),
+            dark: Palette::cssValue($family, $token->darkShade()),
+            soft: $this->soften(Palette::cssValue($family, $token->lightShade())),
+            token: $token->value,
+        );
+    }
+
+    /**
+     * @param  Color|string|array<string, mixed>|null  $color
+     */
+    private function resolveUncached(Color|string|array|null $color, Color $fallback): ResolvedColor
+    {
         if ($color === null || $color === '') {
             return $this->fromToken($fallback);
         }
@@ -103,18 +154,6 @@ final class ColorResolver
         throw IndicatorException::unknownColorToken($value);
     }
 
-    public function fromToken(Color $token): ResolvedColor
-    {
-        $family = $token->family();
-
-        return new ResolvedColor(
-            light: Palette::cssValue($family, $token->lightShade()),
-            dark: Palette::cssValue($family, $token->darkShade()),
-            soft: $this->soften(Palette::cssValue($family, $token->lightShade())),
-            token: $token->value,
-        );
-    }
-
     /**
      * Wrap a resolved colour in a translucent mix for the pill background.
      *
@@ -154,13 +193,13 @@ final class ColorResolver
 
     private function hasApplicationToken(string $value): bool
     {
-        return array_key_exists(strtolower($value), array_change_key_case($this->tokens, CASE_LOWER));
+        return array_key_exists(strtolower($value), $this->loweredTokens);
     }
 
     private function fromApplicationToken(string $value, Color $fallback): ResolvedColor
     {
         /** @var Color|string|array<string, mixed>|null $definition */
-        $definition = array_change_key_case($this->tokens, CASE_LOWER)[strtolower($value)];
+        $definition = $this->loweredTokens[strtolower($value)];
 
         $resolved = $this->resolve($definition, $fallback);
 

@@ -64,7 +64,10 @@ final class ValueNormalizer
         }
 
         // A numeric string becomes an int so it collides with the int form.
-        if ($value !== '' && preg_match('/^-?\d+$/', $value) === 1) {
+        // ctype_digit rather than a regex: this runs for every key of every
+        // state table, on every row of an index, and the engine does not cache
+        // a compiled pattern cheaply enough to matter at that rate.
+        if ($value !== '' && (ctype_digit($value) || ($value[0] === '-' && strlen($value) > 1 && ctype_digit(substr($value, 1))))) {
             return (int) $value;
         }
 

@@ -39,20 +39,45 @@ final class Palette
     /** @var list<int> */
     public const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
 
+    /**
+     * Membership is a hash lookup, not a scan.
+     *
+     * These three run once per resolved colour, and a linear scan over 23
+     * families was the single hottest thing in the resolver on a wide index.
+     *
+     * @var array<string, true>
+     */
+    private const FAMILY_SET = [
+        'primary' => true, 'slate' => true, 'gray' => true, 'zinc' => true,
+        'neutral' => true, 'stone' => true, 'red' => true, 'orange' => true,
+        'amber' => true, 'yellow' => true, 'lime' => true, 'green' => true,
+        'emerald' => true, 'teal' => true, 'cyan' => true, 'sky' => true,
+        'blue' => true, 'indigo' => true, 'violet' => true, 'purple' => true,
+        'fuchsia' => true, 'pink' => true, 'rose' => true,
+    ];
+
+    /** @var array<string, true> */
+    private const SHADELESS_SET = ['black' => true, 'white' => true];
+
+    /** @var array<int, int> Shade => its index in SHADES. */
+    private const SHADE_INDEX = [
+        50 => 0, 100 => 1, 200 => 2, 300 => 3, 400 => 4, 500 => 5,
+        600 => 6, 700 => 7, 800 => 8, 900 => 9, 950 => 10,
+    ];
+
     public static function hasFamily(string $family): bool
     {
-        return in_array($family, self::FAMILIES, true)
-            || in_array($family, self::SHADELESS_FAMILIES, true);
+        return isset(self::FAMILY_SET[$family]) || isset(self::SHADELESS_SET[$family]);
     }
 
     public static function isShadeless(string $family): bool
     {
-        return in_array($family, self::SHADELESS_FAMILIES, true);
+        return isset(self::SHADELESS_SET[$family]);
     }
 
     public static function hasShade(int $shade): bool
     {
-        return in_array($shade, self::SHADES, true);
+        return isset(self::SHADE_INDEX[$shade]);
     }
 
     /**
@@ -83,9 +108,11 @@ final class Palette
             return $shade;
         }
 
-        $index = array_search($shade, self::SHADES, true);
+        // Anything above 300 is at index 4 or higher when it is on the ramp at
+        // all, so the only miss to guard is a shade that is not a ramp stop.
+        $index = self::SHADE_INDEX[$shade] ?? null;
 
-        if ($index === false || $index === 0) {
+        if ($index === null) {
             return $shade;
         }
 
